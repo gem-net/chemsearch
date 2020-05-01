@@ -1,0 +1,23 @@
+name: chemsearch
+channels:
+  - conda-forge
+  - defaults
+  - rdkit
+dependencies:
+  - pip
+  - rdkit
+  - jupyter
+  - jupyterlab
+  - pandas
+  - oauth2client
+  - openbabel
+  - pybel
+  - python-dotenv
+  - jupyter_contrib_nbextensions
+  - google-api-python-client
+  - google-auth
+  - google-auth-httplib2
+  - pip:
+    - gspread
+    - pyscaffold
+
