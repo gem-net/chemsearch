@@ -1,4 +1,5 @@
 .env
+local_db
 # Temporary and binary files
 *~
 *.py[cod]
