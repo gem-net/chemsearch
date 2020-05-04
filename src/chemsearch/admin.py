@@ -9,12 +9,11 @@ from collections import OrderedDict
 
 import pandas as pd
 from rdkit import Chem
-from rdkit.Chem import AllChem
+from rdkit.Chem import AllChem, Draw
 
 from dotenv import load_dotenv, find_dotenv
 from IPython.display import display
 
-TEST_DIR = '/Users/sgg/Desktop/test_molecules'
 
 _logger = logging.getLogger(__name__)
 
@@ -50,8 +49,8 @@ def assemble_archive_metadata(archive_dir=None):
         png_path = os.path.join(mol_dir, 'ref_image.png')
         svg_path = os.path.join(mol_dir, 'ref_image.svg')
         if not os.path.exists(png_path) and not os.path.exists(svg_path):
-            Chem.Draw.MolToFile(m, png_path)
-            Chem.Draw.MolToFile(m, svg_path)
+            Draw.MolToFile(m, png_path)
+            Draw.MolToFile(m, svg_path)
         info['fingerprint_substructure'] = Chem.RDKFingerprint(m).ToBase64()
         morgan_fingerprint = Chem.AllChem.GetMorganFingerprint(m, 2)
         morgan_base64 = base64.b64encode(morgan_fingerprint.ToBinary()).decode('utf8')
