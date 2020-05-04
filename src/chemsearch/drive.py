@@ -102,7 +102,7 @@ def get_category_ids(files_resource=None):
     Returns:
         dictionary of category name -> folder ID.
     """
-    compounds_root = os.environ.get('COMPOUNDS_DIR_ID')
+    compounds_root = os.environ.get('SHARED_DRIVE_ID')
     query = f"{compounds_root!r} in parents and trashed = false and mimeType = 'application/vnd.google-apps.folder'"
     files = run_query(query, as_df=False, files_resource=files_resource)
     categories = {file['name']: file['id'] for file in files}
@@ -143,7 +143,7 @@ def run_query(query, page_size=1000, as_df=True, file_fields=None,
               files_resource=None):
     """Search Google Drive using query."""
     # folder_id = os.environ.get('COMPOUNDS_DIR_ID')
-    team_drive_id = os.environ.get('TEAM_DRIVE_ID')
+    team_drive_id = os.environ.get('SHARED_DRIVE_ID')
     if not files_resource:
         files_resource = get_files_service().files()
     if not file_fields:
