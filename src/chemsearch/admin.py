@@ -102,12 +102,12 @@ def demo_gather_metadata_stage_dir(archive_dir=None):
 
         # m2 = Chem.MolFromSmiles(smarts)
 
-        Chem.Draw.MolToFile(m, os.path.join(mol_dir, 'ref_image.png'))
-        Chem.Draw.MolToFile(m, os.path.join(mol_dir, 'ref_image.svg'))
+        Draw.MolToFile(m, os.path.join(mol_dir, 'ref_image.png'))
+        Draw.MolToFile(m, os.path.join(mol_dir, 'ref_image.svg'))
         _logger.info("  Reference images written to png and svg.\n")
 
 
 def reload_env():
     env_path = os.getenv('ENV_NAME', find_dotenv(usecwd=True))
     _logger.info("Loading .env from %s", env_path)
-    load_dotenv(env_path, override=True)
+    load_dotenv(env_path, override=True, verbose=True)
