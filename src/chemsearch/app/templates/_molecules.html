@@ -1,0 +1,24 @@
+<ul class="molecules row">
+    {% for mol in molecules %}
+    {% if sims %}{% set sim = sims[loop.index] %}{% endif %}
+    <li class="mol-outer col-md-6 col-lg-4 list-unstyled">
+        <div class="mol">
+            <div class="mol-thumb-box">
+                <div><img class="img-responsive img-rounded mol-thumb-img" src="{{ mol.url_svg }}"></div>
+            </div>
+            <div class="mol-content">
+                {%- if sim %}
+                    <div class="mol-sim"><code>SIMILARITY {{ sim|round(3) }}</code></div>
+                {% endif -%}
+                <div class="mol-categ"><code>{{ mol.category }}</code></div>
+                <div class="mol-name">{{ mol.mol_name }}</div>
+                <div class="mol-inchi"><small>InChIKey</small> <span class="mol-inchikey">{{ mol.inchi_key }}</span></div>
+                <div class="mol-dir"><a href="{{ mol.dir_url }}" target="_blank">Directory</a></div>
+                <div class="mol-user"><span class="text-muted">{{ mol.user }}</span></div>
+                <div class="mol-modtime"><span class="text-muted">{{ mol.mod_time }}</span></div>
+            </div>
+        </div>
+    {#  mol.__dict__   #}
+    </li>
+    {% endfor %}
+</ul>

@@ -86,7 +86,7 @@ def get_molfiles(folders, files_resource=None):
         folders (pd.DataFrame): output from get_folders.
         files_resource: files API resource.
     """
-    mols_full = run_query("mimeType = 'chemical/x-mdl-molfile'",
+    mols_full = run_query("mimeType = 'chemical/x-mdl-molfile'  and trashed = false",
                           files_resource=files_resource)  # type: pd.DataFrame
     mols = mols_full[['id', 'name', 'modifiedTime', 'lastModifyingUser',
                       'parents', 'webContentLink']].copy()
@@ -115,8 +115,9 @@ def get_folders(category_dict, files_resource=None):
     df_list = []
     for category in category_dict:
         temp = scan_folder(category_dict[category], files_resource=files_resource)
-        temp.insert(0, 'category', category)
-        df_list.append(temp)
+        if temp is not None:
+            temp.insert(0, 'category', category)
+            df_list.append(temp)
     t2 = time.perf_counter()
     _logger.info(f"Folder lookup complete in {t2 - t1:.1f} seconds.")
     folders = pd.concat(df_list, axis=0, ignore_index=True)

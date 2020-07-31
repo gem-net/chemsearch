@@ -1,0 +1,68 @@
+#draw-section {
+    display: flex;
+}
+
+#search-form-div {
+    margin-left: 2rem;
+    margin-top: 3rem;
+}
+
+.mol-categ code {
+    color: #337ab7; /*#303080;  /*#337ab7*/
+}
+
+.molecules {
+    padding-inline-start: 0px;
+}
+
+.mol-outer {
+    padding: 5px;
+}
+
+.mol {
+    display: flex;
+    /*margin: 20px;*/
+    border: 2px dotted #337ab7;
+    padding: 10px;
+}
+
+.mol-thumb-box {
+    width: 200px;
+    height: 150px;
+    /*border: 2px solid #337ab7;*/
+    margin-right: 2rem;
+    display: flex;
+    justify-content: center;
+}
+.mol-thumb-img {
+    width: 100%;
+    height: 100%;
+}
+
+
+
+.mol-content {
+
+}
+
+.mol-inchi {
+
+}
+
+.mol-inchikey {
+    font-family: 'Consolas', 'Deja Vu Sans Mono', 'Bitstream Vera Sans Mono', monospace;
+}
+
+.mol-name {
+    font-size: large;
+    font-weight: bolder;
+}
+.mol-categ {
+
+}
+
+
+
+.mol-user {
+
+}

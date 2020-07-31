@@ -49,7 +49,7 @@ def setup_logging(loglevel):
     """
     log_format = "[%(asctime)s] %(levelname)s:%(name)s:%(message)s"
     logging.basicConfig(level=loglevel, stream=sys.stdout,
-                        format=log_format, datefmt="%Y-%m-%d %H:%M:%S")
+                        format=log_format, datefmt="%Y-%mol-%d %H:%M:%S")
 
 
 def parse_args(args):

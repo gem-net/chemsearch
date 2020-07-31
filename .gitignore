@@ -1,4 +1,5 @@
 .env
+.env.*
 local_db
 wiki
 # Temporary and binary files

@@ -3,23 +3,20 @@ local archive."""
 
 import os
 import glob
-import base64
 import logging
 from collections import OrderedDict
 
 import pandas as pd
 from rdkit import Chem
-from rdkit.Chem import AllChem, Draw
-
-from dotenv import load_dotenv, find_dotenv
+from rdkit.Chem import Draw
+from rdkit.Chem.Draw import IPythonConsole as ipc
 from IPython.display import display
+from dotenv import load_dotenv, find_dotenv
 
+from .models import LocalMolecule
+from .plot import plot_mol, save_images
 
 _logger = logging.getLogger(__name__)
-
-
-class MolException(Exception):
-    pass
 
 
 def assemble_archive_metadata(archive_dir=None):
@@ -27,34 +24,19 @@ def assemble_archive_metadata(archive_dir=None):
 
     Export summary table (summary.tsv) to archive directory root.
     """
-
+    if archive_dir is None:
+        os.environ.get('LOCAL_DB_PATH', 'local_db')
     drive_data_path = os.path.join(archive_dir, 'gdrive.tsv')
     mols = pd.read_csv(drive_data_path, sep='\t')
     mol_info = []
     for ind, mol in mols.iterrows():
         info = OrderedDict()
         mol_dir = os.path.join(archive_dir, mol.category, mol.folder_name)
-        mol_path = os.path.join(mol_dir, mol['name'])
         _logger.info(f"Processing directory: {mol_dir}")
-        m = Chem.MolFromMolFile(mol_path)
-        info['molecule_id'] = mol['id']  # MOL file ID in
-        info['category'] = mol.category
-        info['user'] = mol.lastModifyingUser
-        info['mod_time'] = mol.modifiedTime
-        info['smiles'] = Chem.MolToSmiles(m)
-        info['smarts'] = Chem.MolToSmarts(m)
-        info['inchi'] = Chem.MolToInchi(m)
-        info['inchi_key'] = Chem.MolToInchiKey(m)  # google-able. "Phenethylcyclohexane"
-        # SAVE REFERENCE IMAGES
-        png_path = os.path.join(mol_dir, 'ref_image.png')
-        svg_path = os.path.join(mol_dir, 'ref_image.svg')
-        if not os.path.exists(png_path) and not os.path.exists(svg_path):
-            Draw.MolToFile(m, png_path)
-            Draw.MolToFile(m, svg_path)
-        info['fingerprint_substructure'] = Chem.RDKFingerprint(m).ToBase64()
-        morgan_fingerprint = Chem.AllChem.GetMorganFingerprint(m, 2)
-        morgan_base64 = base64.b64encode(morgan_fingerprint.ToBinary()).decode('utf8')
-        info['fingerprint_similarity'] = morgan_base64
+        m = LocalMolecule(mol, from_summary=False)
+        save_images(m.mol, mol_dir)
+        for field in m.fields_all:
+            info[field] = getattr(m, field)
         mol_info.append(info)
     summary = pd.DataFrame.from_records(mol_info)
     out_path = os.path.join(archive_dir, 'summary.tsv')
@@ -62,6 +44,17 @@ def assemble_archive_metadata(archive_dir=None):
     _logger.info(f"Reference images written to molecule directories.")
     _logger.info(f"Molecule identifiers and fingerprints written to {out_path}.")
     return summary
+
+
+def save_mol_image_ipc(mol, im_path):
+    ipc.ipython_useSVG = True  # True
+    im_format = os.path.splitext(im_path)[1][1:]
+    fn_mode = {'png': (ipc._toPNG, 'wb'),
+               'svg': (ipc._toSVG, 'w')}
+    fn, mode = fn_mode[im_format]
+    imdata = fn(mol)
+    with open(im_path, mode) as out:
+        out.write(imdata)
 
 
 def demo_gather_metadata_stage_dir(archive_dir=None):

@@ -5,19 +5,25 @@ channels:
   - rdkit
 dependencies:
   - pip
+  - python=3
+  - flask
+  - flask-wtf
   - rdkit
   - jupyter
   - jupyterlab
   - pandas
   - oauth2client
   - openbabel
-  - pybel
   - python-dotenv
   - jupyter_contrib_nbextensions
   - google-api-python-client
   - google-auth
   - google-auth-httplib2
+  - gunicorn
+  - flask-bootstrap
+  - matplotlib
   - pip:
     - gspread
     - pyscaffold
+    - Flask-Session
 
