@@ -7,9 +7,18 @@ _logger = logging.getLogger(__name__)
 
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'hard to guess string'
-    SESSION_TYPE = 'filesystem'
-    SESSION_FILE_DIR = os.environ.get('SESSION_FILE_DIR', os.getcwd())
-    _logger.info(f"{SESSION_FILE_DIR=}")
+    OAUTH_CREDENTIALS = {
+        'google': {
+            'id': os.environ.get('GOOGLE_CLIENT_ID'),
+            'secret': os.environ.get('GOOGLE_SECRET')
+        }
+    }
+    SQLALCHEMY_DATABASE_URI = \
+        'sqlite:///' + os.path.join(basedir, 'db.sqlite')
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    # SESSION_TYPE = 'filesystem'
+    # SESSION_FILE_DIR = os.environ.get('SESSION_FILE_DIR', os.getcwd())
+    # _logger.info(f"{SESSION_FILE_DIR=}")
     MAX_CONTENT_LENGTH = 1024 * 1024  # 1MB request size limit, for uploads
     MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.googlemail.com')
     MAIL_PORT = int(os.environ.get('MAIL_PORT', '587'))

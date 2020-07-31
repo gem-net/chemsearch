@@ -1,6 +1,7 @@
 .env
 .env.*
 local_db
+db.sqlite
 wiki
 # Temporary and binary files
 *~

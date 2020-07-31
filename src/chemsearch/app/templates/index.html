@@ -1,12 +1,32 @@
 {% extends "base.html" %}
 
+{% if current_user.is_authenticated and current_user.in_cgem %}
 {% block head %}
 {{ super() }}
 <link rel="stylesheet" type="text/css" href="/static/kekule.css">
 {% endblock %}
+{% endif %}
 
 
 {% block page_content %}
+
+{% if current_user.is_authenticated %}
+        {% if not current_user.in_cgem %}
+            <p>Unfortunately your ID hasn't been recognized. Maybe you
+                have a different account associated with C-GEM?
+                Try logging out and back in again.</p>
+        {% endif %}
+    {% else %}
+        <div style="display:flex; flex-direction:column; align-items:center;
+            min-height: 300px; justify-content:space-around">
+        <h1>Welcome to the C-GEM molecules database</h1>
+        <p style="text-align: center;">To gain access, please log in.<br/>
+        If you're not affiliated with C-GEM, why not check out our public site at <a href="http://gem-net.net">gem-net.net</a>?</p>
+        <p><a class="btn btn-primary btn-lg" href="{{ url_for('main.oauth_authorize', provider='google') }}">Log in with Google</a></p>
+        </div>
+    {% endif %}
+
+    {% if current_user.is_authenticated and current_user.in_cgem %}
 
 <div class="page-header">
     <h1>Molecules</h1>
@@ -19,5 +39,7 @@
 </div>
 
 {% include '_molecules.html' %}
+
+{% endif %}
 
 {% endblock %}

@@ -22,6 +22,9 @@ dependencies:
   - gunicorn
   - flask-bootstrap
   - matplotlib
+  - Flask-Login
+  - Flask-SQLAlchemy
+  - rauth
   - pip:
     - gspread
     - pyscaffold
