@@ -1,6 +1,6 @@
 import logging
 
-from flask import render_template, flash, redirect, url_for, request, g
+from flask import render_template, flash, redirect, url_for, request, g, current_app
 from flask_login import login_user, logout_user,\
     current_user
 
@@ -17,7 +17,7 @@ _logger = logging.getLogger(__name__)
 
 @main.route('/', methods=['GET', 'POST'])
 def index():
-    if not current_user.is_anonymous and current_user.in_cgem:
+    if not current_app.config['USE_AUTH'] or not current_user.is_anonymous and current_user.in_team:
         molecules = list(get_molecules())
     else:
         molecules = None

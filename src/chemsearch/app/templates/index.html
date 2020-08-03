@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% if current_user.is_authenticated and current_user.in_cgem %}
+{% if not config['USE_AUTH'] or current_user.is_authenticated and current_user.in_team %}
 {% block head %}
 {{ super() }}
 <link rel="stylesheet" type="text/css" href="/static/kekule.css">
@@ -10,8 +10,9 @@
 
 {% block page_content %}
 
-{% if current_user.is_authenticated %}
-        {% if not current_user.in_cgem %}
+{% if config['USE_AUTH'] %}
+    {% if current_user.is_authenticated %}
+        {% if not current_user.in_team %}
             <p>Unfortunately your ID hasn't been recognized. Maybe you
                 have a different account associated with C-GEM?
                 Try logging out and back in again.</p>
@@ -25,16 +26,17 @@
         <p><a class="btn btn-primary btn-lg" href="{{ url_for('main.oauth_authorize', provider='google') }}">Log in with Google</a></p>
         </div>
     {% endif %}
+{% endif %}
 
-    {% if current_user.is_authenticated and current_user.in_cgem %}
+    {% if not config['USE_AUTH'] or current_user.is_authenticated and current_user.in_team %}
 
 <div class="page-header">
     <h1>Molecules</h1>
 </div>
 
 <div id="intro">
-    <p class="mb-0">All molecules indexed in our
-        <a href="https://drive.google.com/drive/folders/0ABtONHtg7k_bUk9PVA" target="_blank">
+    <p class="mb-0">All molecules in the
+        <a href="https://drive.google.com/drive/folders/{{ config['SHARED_DRIVE_ID'] }}" target="_blank">
             Shared Drive</a> are shown below.</p>
 </div>
 

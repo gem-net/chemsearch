@@ -23,7 +23,7 @@
         </div>
         <div class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
-                {% if not config['USE_AUTH'] or current_user.is_authenticated and current_user.in_cgem %}
+                {% if not config['USE_AUTH'] or current_user.is_authenticated and current_user.in_team %}
                 <li><a href="{{ url_for('main.index') }}">Home</a></li>
                 <li><a href="{{ url_for('main.search') }}">Search</a></li>
                 {% endif %}

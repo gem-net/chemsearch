@@ -3,7 +3,7 @@ import logging
 from datetime import datetime
 from collections import namedtuple
 
-from flask import g
+from flask import g, current_app
 from flask_login import UserMixin
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
@@ -23,7 +23,7 @@ class User(UserMixin, db.Model):
     display_name = db.Column(db.String(64), nullable=False)
     email = db.Column(db.String(64), nullable=True)
     last_seen = db.Column(db.DateTime, default=datetime.utcnow)
-    in_cgem = db.Column(db.Boolean, default=False)
+    in_team = db.Column(db.Boolean, default=False)
     alt_email_str = db.Column(db.String(255), nullable=True)
 
     def __repr__(self):
@@ -44,6 +44,8 @@ class User(UserMixin, db.Model):
 
 @login_manager.user_loader
 def load_user(user_id):
+    if not current_app.config['USE_AUTH']:
+        return None
     return User.query.get(int(user_id))
 
 
@@ -65,7 +67,7 @@ def _get_dir_service_handle():
     return dir_service
 
 
-def get_members_dict():
+def _get_members_dict():
     """Get dictionary of {google_id: email_address}.
 
     Return:
@@ -80,14 +82,14 @@ def get_members_dict():
     members_dict = {i['id']: i['email'] for i in res['members'] if 'email' in i}
 
     # DOMAIN-ONLY MEMBERS
-    domain_users = get_domain_users()
+    domain_users = _get_domain_users()
     domain_dict = {u.id: u.email for u in domain_users}
     members_dict.update(domain_dict)
 
     return members_dict
 
 
-def get_domain_users():
+def _get_domain_users():
     """Get list of domain users (who might not be in specified Google Group).
 
     Warning: will only fetch up to 100 users.
@@ -121,9 +123,10 @@ def update_g():
 def update_members_dict():
     """Update members dictionary"""
     global MEMBERS_DICT
-    MEMBERS_DICT.clear()
-    new_dict = get_members_dict()
-    MEMBERS_DICT.update(new_dict)
+    if os.environ.get('USE_AUTH', 'false').lower() not in {'0', 'off', 'false'}:
+        MEMBERS_DICT.clear()
+        new_dict = _get_members_dict()
+        MEMBERS_DICT.update(new_dict)
 
 
 DIR_SERVICE_HANDLE = _get_dir_service_handle()

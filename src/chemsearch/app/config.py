@@ -33,6 +33,8 @@ class Config:
     MAIL_SENDER = os.environ.get('MAIL_SENDER')
     MAIL_ADMIN = os.environ.get('MAIL_ADMIN')
 
+    SHARED_DRIVE_ID = os.environ.get('SHARED_DRIVE_ID')
+
     @staticmethod
     def init_app(app):
         pass

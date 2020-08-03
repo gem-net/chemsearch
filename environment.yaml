@@ -30,4 +30,5 @@ dependencies:
     - pyscaffold
     - Flask-Session
     - flask-shell-ipython
+    - flask-migrate
 

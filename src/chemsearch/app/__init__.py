@@ -4,6 +4,7 @@ from flask import Flask, g
 from flask_bootstrap import Bootstrap
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import current_user, LoginManager
+from flask_migrate import Migrate
 
 # from flask_session import Session
 
@@ -13,6 +14,7 @@ from .config import config
 bootstrap = Bootstrap()
 db = SQLAlchemy()
 login_manager = LoginManager()
+migrate = Migrate()
 # login_manager.login_view = 'main.index'
 
 
@@ -24,6 +26,8 @@ def create_app(config_name):
     bootstrap.init_app(app)
     db.init_app(app)
     login_manager.init_app(app)
+    migrate.init_app(app, db)
+
     # session.init_app(app)
 
     from .main import main as main_blueprint
@@ -37,10 +41,11 @@ def create_app(config_name):
     def before_request():
         from .main.users import update_g
         update_g()
-        if current_user.is_authenticated:
-            current_user.last_seen = datetime.utcnow()
-            # first-request data reload might be necessary for auto-restart development
-            current_user.in_cgem = current_user.social_id in g.members_dict
-            db.session.commit()
+        if app.config['USE_AUTH']:
+            if current_user.is_authenticated:
+                current_user.last_seen = datetime.utcnow()
+                # first-request data reload might be necessary for auto-restart development
+                current_user.in_team = current_user.social_id in g.members_dict
+                db.session.commit()
 
     return app
