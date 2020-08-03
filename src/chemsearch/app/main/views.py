@@ -7,7 +7,8 @@ from flask_login import login_user, logout_user,\
 from . import main
 from .decorators import membership_required
 from .. import db
-from ...db import get_substructure_matches, get_sim_matches, MolException
+from ...db import get_substructure_matches, get_sim_matches, MolException, \
+    get_molecules
 from .users import User
 from ..oauth import OAuthSignIn
 
@@ -17,7 +18,6 @@ _logger = logging.getLogger(__name__)
 @main.route('/', methods=['GET', 'POST'])
 def index():
     if not current_user.is_anonymous and current_user.in_cgem:
-        from chemsearch.db import get_molecules
         molecules = list(get_molecules())
     else:
         molecules = None

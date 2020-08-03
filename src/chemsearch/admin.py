@@ -14,7 +14,7 @@ from IPython.display import display
 from dotenv import load_dotenv, find_dotenv
 
 from .models import LocalMolecule
-from .plot import plot_mol, save_images
+from .plot import save_images
 
 _logger = logging.getLogger(__name__)
 
