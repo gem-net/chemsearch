@@ -29,4 +29,5 @@ dependencies:
     - gspread
     - pyscaffold
     - Flask-Session
+    - flask-shell-ipython
 
