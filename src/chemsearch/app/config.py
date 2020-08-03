@@ -7,12 +7,15 @@ _logger = logging.getLogger(__name__)
 
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'hard to guess string'
+
+    USE_AUTH = os.environ.get('USE_AUTH', 'off').lower() not in {'off', 'false', '0'}
     OAUTH_CREDENTIALS = {
         'google': {
             'id': os.environ.get('GOOGLE_CLIENT_ID'),
             'secret': os.environ.get('GOOGLE_SECRET')
         }
-    }
+        }
+
     SQLALCHEMY_DATABASE_URI = \
         'sqlite:///' + os.path.join(basedir, 'db.sqlite')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
@@ -26,7 +29,7 @@ class Config:
         ['true', 'on', '1']
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
-    MAIL_SUBJECT_PREFIX = '[Journals]'
+    MAIL_SUBJECT_PREFIX = '[Molecules]'
     MAIL_SENDER = os.environ.get('MAIL_SENDER')
     MAIL_ADMIN = os.environ.get('MAIL_ADMIN')
 
