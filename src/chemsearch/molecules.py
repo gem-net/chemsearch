@@ -23,12 +23,21 @@ from .app import create_app
 app = create_app(os.getenv('FLASK_CONFIG') or 'default')
 
 
+@app.cli.command()
+def deploy():
+    """Run deployment tasks."""
+    import shutil
+    # TODO: create symlink in static to local_db dir
+    use_env = '.env.deploy'
+    shutil.copy(use_env, '.env')
+    print(f"Copied from {use_env} to .env")
 
 
 @app.cli.command()
 def develop():
     """Set up development server."""
     import shutil
+    # TODO: create symlink in static to local_db dir
     use_env = '.env.dev'
     shutil.copy(use_env, '.env')
     print(f"Copied from {use_env} to .env")
