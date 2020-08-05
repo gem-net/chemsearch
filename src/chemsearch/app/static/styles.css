@@ -2,6 +2,12 @@
     display: flex;
 }
 
+#chemComposer {
+    margin: 0;
+    width: 600px;
+    height: 400px;
+}
+
 #search-form-div {
     margin-left: 2rem;
     margin-top: 3rem;

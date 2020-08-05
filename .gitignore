@@ -53,3 +53,5 @@ MANIFEST
 
 # Per-project virtualenvs
 .venv*/
+/src/chemsearch/app/static/data
+/notebooks/

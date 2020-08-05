@@ -3,6 +3,7 @@
 {% block head %}
 {{ super() }}
 <link rel="stylesheet" type="text/css" href="/static/kekule.css">
+<script src="/static/kekule.min.js?modules=chemWidget"></script>
 {% endblock %}
 
 
@@ -23,8 +24,12 @@
     <div id="search-form-div" class="ucol-md-3 ucol-md-offset-1">
     <form id="search-form" action="{{ url_for('main.results') }}">
     {#        <button class="btn btn-large btn-info" onclick="dumpMolecules()">Dump!</button>#}
-        <span id="helpBlock" class="help-block">Draw molecule or enter SMILES below.</span>
-        <textarea id='smiles-input' class="form-control" name="smiles" aria-describedby="helpBlock" placeholder="SMILES"></textarea>
+        <div class="smiles-div">
+            <label for='smiles-input'><span id="helpBlock" class="help-block">Draw molecule or enter SMILES below.</span></label>
+            <textarea id='smiles-input' class="form-control" name="smiles" aria-describedby="helpBlock"
+                                                        placeholder="SMILES"></textarea>
+
+        </div>
         <div class="radio">
           <label>
             <input type="radio" name="search_type" id="optionsRadios1" value="similarity" checked>
@@ -49,14 +54,13 @@
 
 {% block scripts %}
 {{ super() }}
-<script src="/static/kekule.min.js?modules=chemWidget,algorithm&locals=en,zh"></script>
 
   <script>
     var chemEditor;
     var chemComposer;
     function init()
     {
-      /*
+        /*
       var elem = document.getElementById('chemComposer');
       var chemEditor = new Kekule.Editor.ChemSpaceEditor(document, null, Kekule.Render.RendererType.R2D);
       chemComposer = new Kekule.Editor.Composer(elem, chemEditor);
@@ -103,35 +107,6 @@
       }
     }
 
-    function dumpMolecules()
-    {
-      // Get all molecule objects inside editor
-      var mols = getComposer().exportObjs(Kekule.Molecule);
-      // dump information
-      var msg = 'Molecule count: ' + mols.length + '\n';
-      for (var i = 0, l = mols.length; i < l; ++i)
-      {
-        var mol = mols[i];
-        msg += '--------------------\n' + Kekule.IO.saveFormatData(mol, 'smi') + '\n';
-      }
-      console.log(msg);
-      alert(msg);
-    }
-
-
   </script>
-  <style>
-    /*html, body
-    {
-      margin: 0;
-      padding: 0;
-      overflow: scroll;
-      touch-action: none;
-    } */
-    #chemComposer
-    {
-      margin: 0;
-    }
-  </style>
 
 {% endblock %}
