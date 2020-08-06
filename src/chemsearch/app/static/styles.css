@@ -14,7 +14,7 @@
 }
 
 .mol-categ code {
-    color: #337ab7; /*#303080;  /*#337ab7*/
+    color: #6f3fada6; /*#303080;  /*#337ab7*/
 }
 
 .molecules {
@@ -25,18 +25,26 @@
     padding: 5px;
 }
 
+@media only screen and (min-width: 992px) {
+    .mol {
+        min-height: 189px;
+        }
+}
+
 .mol {
     display: flex;
-    /*margin: 20px;*/
+    max-width: 500px;
     border: 2px dotted #337ab7;
     padding: 10px;
-    min-height: 189px;
+    margin-left: auto;
+    margin-right: auto;
     max-height: 189px;
     overflow: scroll;
 }
 
 .mol-thumb-box {
-    width: 200px;
+    width: 150px;
+    min-width: 150px;
     height: 150px;
     /*border: 2px solid #337ab7;*/
     margin-right: 2rem;
@@ -60,6 +68,7 @@
 
 .mol-inchikey {
     font-family: 'Consolas', 'Deja Vu Sans Mono', 'Bitstream Vera Sans Mono', monospace;
+    font-size: x-small;
 }
 
 .mol-name {
@@ -74,4 +83,14 @@
 
 .mol-user {
 
+}
+
+.dont-break-out {
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-word;
+  -ms-hyphens: auto;
+  -moz-hyphens: auto;
+  -webkit-hyphens: auto;
+  hyphens: auto;
 }
