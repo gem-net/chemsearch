@@ -1,13 +1,13 @@
 <ul class="molecules row">
     {% for mol in molecules %}
-    {% if sims %}{% set sim = sims[loop.index] %}{% endif %}
+    {% if sims %}{% set sim = sims[loop.index0] %}{% endif %}
     <li class="mol-outer col-md-6 col-lg-4 list-unstyled">
         <div class="mol">
             <div class="mol-thumb-box">
-                <div><img class="img-responsive img-rounded mol-thumb-img" src="{{ mol.url_svg }}"></div>
+                <div><img class="img-responsive img-rounded mol-thumb-img" loading="lazy" src="{{ mol.url_svg }}"></div>
             </div>
             <div class="mol-content">
-                {%- if sim %}
+                {%- if sims %}
                     <div class="mol-sim"><code>SIMILARITY {{ sim|round(3) }}</code></div>
                 {% endif -%}
                 <div class="mol-categ"><code>{{ mol.category }}</code></div>
