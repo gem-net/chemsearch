@@ -31,4 +31,4 @@ dependencies:
     - Flask-Session
     - flask-shell-ipython
     - flask-migrate
-
+    - more-itertools

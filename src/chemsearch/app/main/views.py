@@ -1,16 +1,18 @@
 import logging
 
-from flask import render_template, flash, redirect, url_for, request, g, current_app
+from flask import render_template, flash, redirect, url_for, request, g, \
+    current_app, abort
 from flask_login import login_user, logout_user,\
     current_user
 
 from . import main
 from .decorators import membership_required
-from .. import db
-from ...db import get_substructure_matches, get_sim_matches, MolException, \
-    get_molecules
 from .users import User
+from .. import db
 from ..oauth import OAuthSignIn
+from ..paging import get_page_items_or_404, get_page_count
+from ...db import get_substructure_matches, get_sim_matches, MolException, LOCAL_MOLECULES
+
 
 _logger = logging.getLogger(__name__)
 
@@ -18,7 +20,8 @@ _logger = logging.getLogger(__name__)
 @main.route('/', methods=['GET', 'POST'])
 def index():
     if not current_app.config['USE_AUTH'] or not current_user.is_anonymous and current_user.in_team:
-        molecules = list(get_molecules())
+        page_no = request.args.get('page', 1, type=int)
+        molecules = get_page_items_or_404(LOCAL_MOLECULES, page_no)
     else:
         molecules = None
     return render_template('index.html', molecules=molecules)
@@ -43,23 +46,31 @@ def results():
     if smiles in (None, '') or search_type in (None, ''):
         flash("Bad inputs", "error")
         return redirect(url_for('.search'))
+    page_no = request.args.get('page', 1, type=int)
     if search_type == 'substructure':
         try:
-            molecules = get_substructure_matches(smiles)
+            molecules_all = get_substructure_matches(smiles)
         except MolException as e:
             flash(str(e), "error")
             return redirect(url_for('.search'))
+        n_pages = get_page_count(len(molecules_all))
+        molecules = get_page_items_or_404(molecules_all, page_no) \
+            if molecules_all else []
         sims = None  # no similarity scores for this search type
-    else:
+    elif search_type == 'similarity':
         try:
-            sims, molecules = get_sim_matches(smiles)
+            sims_all, molecules_all = get_sim_matches(smiles)
         except MolException as e:
             flash(str(e), "error")
             return redirect(url_for('.search'))
+        n_pages = get_page_count(len(molecules_all))
+        molecules = get_page_items_or_404(molecules_all, page_no)
+        sims = get_page_items_or_404(sims_all, page_no)
+    else:
+        abort(404, "Unrecognized search type.")
     return render_template('results.html', smiles=smiles,
-                           molecules=molecules,
-                           sims=sims,
-                           search_type=search_type)
+                           molecules=molecules, sims=sims,
+                           search_type=search_type, n_pages=n_pages)
 
 
 @main.route('/logout')
