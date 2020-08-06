@@ -1,4 +1,4 @@
-"""Classes for molecules (query version and local extended info)."""
+"""Classes for molecules (user input version and local extended info)."""
 import os
 import base64
 from urllib.parse import urljoin
@@ -13,25 +13,25 @@ class Molecule:
     """Basic molecule stats object."""
     fields_stat = (
         'smiles',
-        'smarts',
-        'inchi',
+        # 'smarts',
+        # 'inchi',
         'inchi_key',
-        'fingerprint_substructure',
-        'fingerprint_similarity',
+        # 'fingerprint_substructure',
+        # 'fingerprint_similarity',
     )
 
     def __init__(self, mol):
         """Build stats from rdchem.Mol object."""
         self.mol = mol
         self.smiles = Chem.MolToSmiles(mol)
-        self.smarts = Chem.MolToSmarts(mol)
-        self.inchi = Chem.MolToInchi(mol)
+        # self.smarts = Chem.MolToSmarts(mol)
+        # self.inchi = Chem.MolToInchi(mol)
         self.inchi_key = Chem.MolToInchiKey(mol)  # google-able. "Phenethylcyclohexane"
-        self.fingerprint_substructure = Chem.RDKFingerprint(mol).ToBase64()
+        # self.fingerprint_substructure = Chem.RDKFingerprint(mol).ToBase64()
         morgan_fingerprint = Molecule.get_morgan_fingerprint(mol)
         self.fingerprint_similarity_raw = morgan_fingerprint
-        morgan_base64 = base64.b64encode(morgan_fingerprint.ToBinary()).decode('utf8')
-        self.fingerprint_similarity = morgan_base64
+        # morgan_base64 = base64.b64encode(morgan_fingerprint.ToBinary()).decode('utf8')
+        # self.fingerprint_similarity = morgan_base64
 
     @classmethod
     def get_morgan_fingerprint(cls, mol):
