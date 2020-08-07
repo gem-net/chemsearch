@@ -8,7 +8,7 @@ from flask_login import UserMixin
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 
-from .. import db, login_manager
+from . import db, login_manager
 
 
 logger = logging.getLogger(__name__)

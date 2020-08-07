@@ -7,8 +7,8 @@ from flask_login import login_user, logout_user,\
 
 from . import main
 from .decorators import membership_required
-from .users import User
 from .. import db
+from ..users import User
 from ..oauth import OAuthSignIn
 from ..paging import get_page_items_or_404, get_page_count
 from ...db import get_substructure_matches, get_sim_matches, MolException, LOCAL_MOLECULES

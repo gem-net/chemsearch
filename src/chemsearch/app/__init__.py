@@ -39,7 +39,7 @@ def create_app(config_name):
 
     @app.before_request
     def before_request():
-        from .main.users import update_g
+        from .users import update_g
         update_g()
         if app.config['USE_AUTH']:
             if current_user.is_authenticated:
