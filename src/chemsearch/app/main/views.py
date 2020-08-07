@@ -22,9 +22,11 @@ def index():
     if not current_app.config['USE_AUTH'] or not current_user.is_anonymous and current_user.in_team:
         page_no = request.args.get('page', 1, type=int)
         molecules = get_page_items_or_404(LOCAL_MOLECULES, page_no)
+        n_pages = get_page_count(len(LOCAL_MOLECULES))
     else:
         molecules = None
-    return render_template('index.html', molecules=molecules)
+        n_pages = 0
+    return render_template('index.html', molecules=molecules, n_pages=n_pages)
 
 
 @main.route('/search', methods=['GET', 'POST'])

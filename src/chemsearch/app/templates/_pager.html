@@ -1,0 +1,20 @@
+{% set page = request.args.get('page', 1) | int %}
+{% set new_args = dict(request.args) %}
+{% if 'page' in new_args %}{% do new_args.pop('page') %}{% endif %}
+{% set prev_url =  url_for(request.endpoint, page=page - 1, **new_args) %}
+{% set next_url =  url_for(request.endpoint, page=page + 1, **new_args) %}
+
+{% if n_pages is undefined or n_pages != 0 %}
+<div><p class="text-muted">Page {{ page }}{% if n_pages is defined %} of {{ n_pages }}{% endif %}</p></div>
+
+<nav aria-label="...">
+  <ul class="pager">
+    {%- if page > 1 %}
+      <li class="previous"><a href="{{ prev_url }}"><span aria-hidden="true">&larr;</span> Previous</a></li>
+    {% endif -%}
+    {%- if page < n_pages %}
+        <li class="next"><a href="{{ next_url }}">Next <span aria-hidden="true">&rarr;</span></a></li>
+    {% endif -%}
+  </ul>
+</nav>
+{% endif %}
