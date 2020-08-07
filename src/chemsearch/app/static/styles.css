@@ -43,9 +43,9 @@
 }
 
 .mol-thumb-box {
-    width: 150px;
-    min-width: 150px;
-    height: 150px;
+    width: 120px;
+    min-width: 120px;
+    height: 120px;
     /*border: 2px solid #337ab7;*/
     margin-right: 2rem;
     display: flex;
@@ -68,7 +68,7 @@
 
 .mol-inchikey {
     font-family: 'Consolas', 'Deja Vu Sans Mono', 'Bitstream Vera Sans Mono', monospace;
-    font-size: x-small;
+    font-size: small;
 }
 
 .mol-name {
