@@ -75,6 +75,15 @@ def results():
                            search_type=search_type, n_pages=n_pages)
 
 
+@main.route('/admin', methods=['GET', 'POST'])
+@membership_required
+def admin():
+    if not current_user.is_admin:
+        abort(503, 'Unauthorized')
+    admin_users = User.query.filter_by(is_admin=True).all()
+    return render_template('admin.html', admin_users=admin_users)
+
+
 @main.route('/logout')
 def logout():
     logout_user()

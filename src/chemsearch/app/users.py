@@ -25,6 +25,7 @@ class User(UserMixin, db.Model):
     last_seen = db.Column(db.DateTime, default=datetime.utcnow)
     in_team = db.Column(db.Boolean, default=False)
     alt_email_str = db.Column(db.String(255), nullable=True)
+    is_admin = db.Column(db.Boolean, default=False)
 
     def __repr__(self):
         return '<User {}>'.format(self.email)

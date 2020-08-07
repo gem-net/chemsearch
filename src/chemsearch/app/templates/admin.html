@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block page_content %}
+
+<div class="page-header">
+    <h1>Admin</h1>
+</div>
+
+<div id="admin-list">
+{% if admin_users %}
+    {% for user in admin_users %}
+        <ul>
+            <li>{{ user.email }}</li>
+        </ul>
+    {% endfor %}
+{% else %}
+    <p>No matches found.</p>
+{% endif %}
+</div>
+
+{% endblock %}
