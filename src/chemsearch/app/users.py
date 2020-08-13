@@ -1,46 +1,17 @@
 import os
 import logging
-from datetime import datetime
 from collections import namedtuple
 
 from flask import g, current_app
-from flask_login import UserMixin
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 
-from . import db, login_manager
-
+from . import login_manager
+from .models import User
 
 logger = logging.getLogger(__name__)
 MEMBERS_DICT = {}  # updated at end of module
 # DIR_SERVICE_HANDLE = None  # saved at end of module
-
-
-class User(UserMixin, db.Model):
-    __tablename__ = 'users'
-    id = db.Column(db.Integer, primary_key=True)
-    social_id = db.Column(db.String(64), nullable=False, unique=True)
-    display_name = db.Column(db.String(64), nullable=False)
-    email = db.Column(db.String(64), nullable=True)
-    last_seen = db.Column(db.DateTime, default=datetime.utcnow)
-    in_team = db.Column(db.Boolean, default=False)
-    alt_email_str = db.Column(db.String(255), nullable=True)
-    is_admin = db.Column(db.Boolean, default=False)
-
-    def __repr__(self):
-        return '<User {}>'.format(self.email)
-
-    @property
-    def alt_emails(self):
-        """Get list of non-primary emails associated with google ID."""
-        if not self.alt_email_str:
-            return []
-        return self.alt_email_str.split(',')
-
-    @property
-    def known_emails(self):
-        """Get set of all known emails for this user."""
-        return {self.email}.union(set(self.alt_emails))
 
 
 @login_manager.user_loader
@@ -99,12 +70,12 @@ def _get_domain_users():
     service = DIR_SERVICE_HANDLE
     logger.info("Looking up domain-specific users.")
     res = service.users().list(customer='my_customer').execute()
-    User = namedtuple('User', ['id', 'email', 'full_name'])
+    UserInfo = namedtuple('UserInfo', ['id', 'email', 'full_name'])
     for user in res['users']:
         user_id = user['id']
         full_name = user['name']['fullName']
         email = user['primaryEmail']
-        users.append(User(user_id, email, full_name))
+        users.append(UserInfo(user_id, email, full_name))
     return users
 
 
