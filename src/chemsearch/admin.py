@@ -15,8 +15,19 @@ from dotenv import load_dotenv, find_dotenv
 
 from .molecule import LocalMolecule
 from .plot import save_images
+from . import drive
 
 _logger = logging.getLogger(__name__)
+
+
+def run_full_scan_and_rebuild():
+    meta = drive.Meta().build()
+    reload_env()
+    archive_dir = os.environ['LOCAL_DB_PATH']
+    drive.create_local_archive(meta.molfiles, local_root=archive_dir,
+                               files_resource=meta.files_resource)
+    df = assemble_archive_metadata(archive_dir)
+    return df
 
 
 def assemble_archive_metadata(archive_dir=None):

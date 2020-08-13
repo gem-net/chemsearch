@@ -19,23 +19,33 @@ class Meta:
     """Hold file metadata for molecules in Shared Drive."""
     def __init__(self):
         """Create empty metadata object."""
-        self.category_dict = None
-        self.folders = None
-        self.molfiles = None
+        self.category_dict = dict()
+        self.folders = pd.DataFrame()
+        self.molfiles = pd.DataFrame()
         self.files_resource = None
 
     def build(self):
         """Gather all metadata using Drive API."""
-        self.load_files_resource()
+        self._load_files_resource()
         categories = get_category_ids(files_resource=self.files_resource)
-        folders = get_folders(categories, files_resource=self.files_resource)
-        mols = get_molfiles(folders, files_resource=self.files_resource)
+        _logger.info(f"Identified {len(categories)} categories.")
+        folders = get_mol_folders(categories, files_resource=self.files_resource)
+        _logger.info(f"Identified {len(folders)} molecule directories.")
+        mols = get_mol_files(folders, files_resource=self.files_resource)
+        _logger.info(f"Identified {len(mols)} MOL files.")
         self.category_dict = categories
         self.folders = folders
         self.molfiles = mols
         return self
 
-    def load_files_resource(self):
+    @property
+    def latest_mol_time(self):
+        if not len(self.molfiles):
+            return None
+        last_mod = self.molfiles.modifiedTime.sort_values(ascending=False).iloc[0]
+        return int(last_mod.timestamp())
+
+    def _load_files_resource(self):
         resource = get_files_service().files()
         self.files_resource = resource
 
@@ -46,7 +56,7 @@ def create_local_archive(mols, local_root=None, files_resource=None):
     Local archive has category folders, with nested molecule directories.
 
     Args:
-        mols (pd.DataFrame): MOL table, output from get_molfiles.
+        mols (pd.DataFrame): MOL table, output from get_mol_files.
         local_root (str): path to directory in which to store files.
         files_resource: files API resource.
     """
@@ -79,11 +89,11 @@ def create_local_archive(mols, local_root=None, files_resource=None):
     mols.to_csv(mol_data_path, sep='\t', index=False)
 
 
-def get_molfiles(folders, files_resource=None):
+def get_mol_files(folders, files_resource=None):
     """Find MOL files and join to folder info.
 
     Args:
-        folders (pd.DataFrame): output from get_folders.
+        folders (pd.DataFrame): output from get_mol_folders.
         files_resource: files API resource.
     """
     mols_full = run_query("mimeType = 'chemical/x-mdl-molfile'  and trashed = false",
@@ -93,6 +103,11 @@ def get_molfiles(folders, files_resource=None):
     mols['folder_id'] = mols['parents'].transform(lambda v: v[0])
     mols.drop('parents', axis=1, inplace=True)
     mol_info = mols.merge(folders, how='left', on='folder_id')
+    # ignore mol files that aren't in top molecule folders
+    n_ignore = mol_info.category.isnull().sum()
+    if n_ignore:
+        _logger.info(f"Skipping {n_ignore} molecules in subdirectories.")
+        mol_info.dropna(axis=0, subset=['category'], inplace=True)
     return mol_info
 
 
@@ -109,7 +124,7 @@ def get_category_ids(files_resource=None):
     return categories
 
 
-def get_folders(category_dict, files_resource=None):
+def get_mol_folders(category_dict, files_resource=None):
     """Get table of folder metadata for all molecule folders in all categories."""
     t1 = time.perf_counter()
     df_list = []
