@@ -23,6 +23,13 @@ from .app import create_app
 app = create_app(os.getenv('FLASK_CONFIG') or 'default')
 
 
+@app.shell_context_processor
+def make_shell_context():
+    from .app import db
+    from .app.models import User, Rebuild
+    return dict(db=db, User=User, Rebuild=Rebuild)
+
+
 @app.cli.command()
 def deploy():
     """Run deployment tasks."""
