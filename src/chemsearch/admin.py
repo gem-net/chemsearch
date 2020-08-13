@@ -13,7 +13,7 @@ from rdkit.Chem.Draw import IPythonConsole as ipc
 from IPython.display import display
 from dotenv import load_dotenv, find_dotenv
 
-from .models import LocalMolecule
+from .molecule import LocalMolecule
 from .plot import save_images
 
 _logger = logging.getLogger(__name__)

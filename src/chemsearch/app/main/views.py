@@ -6,7 +6,7 @@ from flask_login import login_user, logout_user,\
     current_user
 
 from . import main
-from .decorators import membership_required
+from .decorators import membership_required, admin_required
 from .. import db
 from ..users import User
 from ..oauth import OAuthSignIn
@@ -78,10 +78,31 @@ def results():
 @main.route('/admin', methods=['GET', 'POST'])
 @membership_required
 def admin():
-    if not current_user.is_admin:
+    if current_app.config['USE_AUTH'] and not current_user.is_admin:
         abort(503, 'Unauthorized')
     admin_users = User.query.filter_by(is_admin=True).all()
-    return render_template('admin.html', admin_users=admin_users)
+    from .forms import admin_form_from_users
+    user_filter = User.id != current_user.id if not current_user.is_anonymous \
+        else None
+    other_users = User.query.filter(user_filter).all()
+    form = admin_form_from_users(current_user, other_users)
+    if form.validate_on_submit():
+        # UPDATE USERS
+        # user_ids = [int(i[5:]) for i in form.data if i.startswith('user')]
+        updated_users = []
+        for user in other_users:
+            user_key = f"user_{user.id}"
+            if user_key in form.data:
+                marked_admin = form.data[user_key]
+                if marked_admin != user.is_admin:
+                    user.is_admin = marked_admin
+                    db.session.add(user)
+                    updated_users.append(user)
+        if updated_users:
+            db.session.commit()
+        flash(f'{len(updated_users)} admins modified.')
+        return redirect(url_for('main.admin'))
+    return render_template('admin.html', admin_users=admin_users, form=form)
 
 
 @main.route('/logout')

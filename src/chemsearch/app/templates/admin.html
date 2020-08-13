@@ -1,4 +1,6 @@
 {% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
 
 {% block page_content %}
 
@@ -6,16 +8,84 @@
     <h1>Admin</h1>
 </div>
 
-<div id="admin-list">
-{% if admin_users %}
-    {% for user in admin_users %}
-        <ul>
-            <li>{{ user.email }}</li>
-        </ul>
-    {% endfor %}
-{% else %}
-    <p>No matches found.</p>
-{% endif %}
+
+<div id=admin-db" class="panel panel-default">
+  <div class="panel-heading">Database admin</div>
+  <div class="panel-body">
+    <button type="button" id="reload-button" class="btn btn-default btn-lg">
+        <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span> Rebuild DB
+    </button>
+    <div id="spinner" class="hidden"><img src="{{ url_for('static', filename='loading.gif') }}">&nbsp;Loading...</div>
+    <div id="build-stats"></div>
+  </div>
 </div>
+
+<div id="admin-users" class="panel panel-default">
+  <div class="panel-heading">User admin</div>
+  <div class="panel-body">
+
+    {% if config['USE_AUTH'] %}
+    <div id="admin-list">
+        {% if admin_users %}
+            <p>Current admin users:</p>
+
+        <form action="" method="post" class="form" role="form">
+            {{ form.hidden_tag() }}
+          <div class="checkbox disabled">
+          <label>
+            <input checked="" id="current_user" name="current_user" type="checkbox" value="y" disabled> {{ form.current_user.label.text }}
+          </label>
+
+          </div>
+        {%- for field in form %}
+            {%- if field.name.startswith('user_') %}
+            {{ wtf.form_field(field) }}
+            {% endif -%}
+        {% endfor %}
+        {{ wtf.form_field(form.submit) }}
+        </form>
+        {% else %}
+        <p>There are no designated admin users.</p>
+        {% endif %}
+    {% else %}
+        Note: Authentication is switched off.
+    {% endif %}
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}
+
+
+{% block scripts %}
+{{super()}}
+
+<script>
+
+    $(function(){
+        const spinner_id = '#spinner';
+        const stats_id = '#build-stats';
+        const btn = document.getElementById('reload-button');
+        btn.onclick = function() {
+            db_rebuild(stats_id, spinner_id)
+        }
+    });
+
+    function db_rebuild(destElem, loadingElem) {
+        console.log('Rebuilding molecules database.')
+        $(loadingElem).show()
+        $.post('{{ url_for("main.reload") }}', {
+        }).done(function(response) {
+            $(loadingElem).hide()
+            console.log(response)
+            $(destElem).html(JSON.stringify(response))
+        }).fail(function() {
+            $(loadingElem).hide()
+            $(destElem).text("Error: Could not contact server.");
+        });
+    }
+</script>
+
 
 {% endblock %}

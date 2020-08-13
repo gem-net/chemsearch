@@ -4,7 +4,7 @@ import pandas as pd
 from rdkit.Chem import MolFromSmiles
 from rdkit.DataStructs import TanimotoSimilarity
 
-from .models import LocalMolecule, Molecule
+from .molecule import LocalMolecule, Molecule
 
 
 class MolException(Exception):

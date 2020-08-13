@@ -1,6 +1,6 @@
 """Classes for molecules (user input version and local extended info)."""
 import os
-import base64
+# import base64
 from urllib.parse import urljoin
 
 from flask import url_for
