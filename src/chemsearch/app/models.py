@@ -47,6 +47,10 @@ class Rebuild(db.Model):
     def __repr__(self):
         return '<Rebuild {}>'.format(self.id)
 
+    def get_progress_message(self):
+        initial = f"Rebuild in progress."
+        return f"{initial} Started at {self.start_time}."
+
 
 # class Status(db.Model):
 #     __tablename__ = 'status'

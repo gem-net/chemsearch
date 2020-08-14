@@ -3,7 +3,8 @@ from .models import Rebuild
 
 
 def get_rebuilds_in_progress():
-    return Rebuild.query.filter_by(complete=False).all()
+    return Rebuild.query.filter_by(complete=False)\
+        .order_by(Rebuild.start_time).all()
 
 
 def get_most_recent_complete_rebuild():
