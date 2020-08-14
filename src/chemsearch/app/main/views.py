@@ -7,8 +7,10 @@ from flask_login import login_user, logout_user,\
 
 from . import main
 from .decorators import membership_required, admin_required
+from .forms import admin_form_from_users
 from .. import db
 from ..models import User
+from .. import rebuild
 from ..oauth import OAuthSignIn
 from ..paging import get_page_items_or_404, get_page_count
 from ...db import get_substructure_matches, get_sim_matches, MolException, LOCAL_MOLECULES
@@ -76,33 +78,25 @@ def results():
 
 
 @main.route('/admin', methods=['GET', 'POST'])
-@membership_required
+@admin_required
 def admin():
     if current_app.config['USE_AUTH'] and not current_user.is_admin:
         abort(503, 'Unauthorized')
-    admin_users = User.query.filter_by(is_admin=True).all()
-    from .forms import admin_form_from_users
-    user_filter = User.id != current_user.id if not current_user.is_anonymous \
-        else None
-    other_users = User.query.filter(user_filter).all()
-    form = admin_form_from_users(current_user, other_users)
-    if form.validate_on_submit():
-        # UPDATE USERS
-        # user_ids = [int(i[5:]) for i in form.data if i.startswith('user')]
-        updated_users = []
-        for user in other_users:
-            user_key = f"user_{user.id}"
-            if user_key in form.data:
-                marked_admin = form.data[user_key]
-                if marked_admin != user.is_admin:
-                    user.is_admin = marked_admin
-                    db.session.add(user)
-                    updated_users.append(user)
-        if updated_users:
-            db.session.commit()
-        flash(f'{len(updated_users)} admins modified.')
-        return redirect(url_for('main.admin'))
-    return render_template('admin.html', admin_users=admin_users, form=form)
+    if current_app.config['USE_AUTH']:
+        other_users = User.query.filter(User.id != current_user.id).all()
+        form = admin_form_from_users(current_user, other_users)
+        if form.validate_on_submit():
+            updated_users = form.update_admins(other_users)
+            flash(f'{len(updated_users)} admins modified.')
+            return redirect(url_for('main.admin'))
+    else:
+        form = None
+    last_rebuild = rebuild.get_most_recent_complete_rebuild()
+    in_progress_builds = rebuild.get_rebuilds_in_progress()
+    return render_template('admin.html', form=form,
+                           last_rebuild=last_rebuild,
+                           in_progress_builds=in_progress_builds
+                           )
 
 
 @main.route('/logout')
