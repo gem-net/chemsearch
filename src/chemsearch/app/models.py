@@ -32,6 +32,9 @@ class User(UserMixin, db.Model):
         """Get set of all known emails for this user."""
         return {self.email}.union(set(self.alt_emails))
 
+    def get_rebuilds_in_progress(self):
+        return Rebuild.query.filter_by(user=self, complete=False).all()
+
 
 class Rebuild(db.Model):
     __tablename__ = 'builds'
