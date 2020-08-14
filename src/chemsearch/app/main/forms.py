@@ -40,3 +40,7 @@ def admin_form_from_users(current_user: User, other_users: List[User]):
 
     form = CustomAdminForm()
     return form
+
+
+class EmptyForm(FlaskForm):
+    submit = SubmitField('Submit')

@@ -7,9 +7,9 @@ from flask_login import login_user, logout_user,\
 
 from . import main
 from .decorators import membership_required, admin_required
-from .forms import admin_form_from_users
+from .forms import admin_form_from_users, EmptyForm
 from .. import db
-from ..models import User
+from ..models import User, Rebuild
 from .. import rebuild
 from ..oauth import OAuthSignIn
 from ..paging import get_page_items_or_404, get_page_count
@@ -93,16 +93,42 @@ def admin():
         form = None
     last_rebuild = rebuild.get_most_recent_complete_rebuild()
     in_progress_builds = rebuild.get_rebuilds_in_progress()
-    return render_template('admin.html', form=form,
+    empty_form = EmptyForm()
+    return render_template('admin.html', user_form=form,
+                           empty_form=empty_form,
                            last_rebuild=last_rebuild,
-                           in_progress_builds=in_progress_builds
+                           in_progress_builds=in_progress_builds,
                            )
+
+
+@main.route('/clear-rebuilds', methods=['POST'])
+@admin_required
+def clear_rebuilds():
+    in_progress = rebuild.get_rebuilds_in_progress()
+    for r in in_progress:
+        r.complete = None
+        db.session.add(r)
+    db.session.commit()
+    flash("Incomplete rebuilds cleared.")
+    return redirect(url_for('main.admin'))
 
 
 @main.route('/logout')
 def logout():
     logout_user()
     return redirect(url_for('.index'))
+
+
+@main.route('/reload', methods=['GET', 'POST'])
+@admin_required
+def reload():
+    from ...admin import run_full_scan_and_rebuild
+    # df = run_full_scan_and_rebuild()
+    # categ_counts = df.category.value_counts().to_dict()
+    r = Rebuild(user=current_user)
+    db.session.add(r)
+    db.session.commit()
+    return redirect(url_for('main.admin'))
 
 
 @main.route('/authorize/<provider>')
