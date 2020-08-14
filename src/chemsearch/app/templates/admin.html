@@ -74,7 +74,7 @@
 
     function db_rebuild(destElem, loadingElem) {
         console.log('Rebuilding molecules database.')
-        $(loadingElem).show()
+        $(loadingElem).removeClass("hidden")
         $.post('{{ url_for("main.reload") }}', {
         }).done(function(response) {
             $(loadingElem).hide()
