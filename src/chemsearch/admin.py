@@ -20,7 +20,7 @@ from . import drive
 _logger = logging.getLogger(__name__)
 
 
-def run_full_scan_and_rebuild():
+def run_full_scan_and_rebuild_no_app():
     meta = drive.Meta().build()
     reload_env()
     archive_dir = os.environ['LOCAL_DB_PATH']

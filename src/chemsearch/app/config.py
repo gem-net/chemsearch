@@ -37,6 +37,8 @@ class Config:
 
     SHARED_DRIVE_ID = os.environ.get('SHARED_DRIVE_ID')
 
+    LOCAL_DB_PATH = os.environ.get('LOCAL_DB_PATH')
+
     @staticmethod
     def init_app(app):
         pass

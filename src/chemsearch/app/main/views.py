@@ -122,12 +122,16 @@ def logout():
 @main.route('/reload', methods=['GET', 'POST'])
 @admin_required
 def reload():
-    from ...admin import run_full_scan_and_rebuild
-    # df = run_full_scan_and_rebuild()
-    # categ_counts = df.category.value_counts().to_dict()
-    r = Rebuild(user=current_user)
+    from ..rebuild import run_full_scan_and_rebuild
+    if current_user.is_anonymous:
+        r = Rebuild()
+    else:
+        r = Rebuild(current_user)
     db.session.add(r)
     db.session.commit()
+    start_time = r.start_time.strftime('%Y-%m-%d %H:%M')
+    r.set_status_and_commit(f"Rebuild started at {start_time}.")
+    run_full_scan_and_rebuild(r.id)
     return redirect(url_for('main.admin'))
 
 
