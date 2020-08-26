@@ -6,7 +6,7 @@ from flask_login import login_user, logout_user,\
     current_user
 
 from . import main
-from .decorators import membership_required, admin_required
+from ..decorators import membership_required, admin_required
 from .forms import admin_form_from_users, EmptyForm
 from .. import db
 from ..models import User, Rebuild
