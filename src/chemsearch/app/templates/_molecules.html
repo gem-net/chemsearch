@@ -15,7 +15,7 @@
                 <div class="mol-inchi"><span class="mol-inchikey">{{ mol.inchi_key }}</span></div>
                 <div class="mol-dir"><a href="{{ mol.dir_url }}" target="_blank">Directory</a></div>
                 <div class="mol-user"><span class="text-muted">{{ mol.user }}</span></div>
-                <div class="mol-modtime"><span class="text-muted">{{ mol.mod_time }}</span></div>
+                <div class="mol-modtime"><span class="text-muted">{{ moment(mol.mod_time).calendar() }}</span></div>
             </div>
         </div>
     {#  mol.__dict__   #}

@@ -16,7 +16,8 @@ def load_molecules(load_rdkit_mol=True):
     # gd = pd.read_csv(drive_path, sep='\t')
     local_db_path = os.environ.get('LOCAL_DB_PATH', 'local_db')
     summary_path = os.path.join(local_db_path, 'summary.tsv')
-    df = pd.read_csv(summary_path, sep='\t')
+    df = pd.read_csv(summary_path, sep='\t', parse_dates=['mod_time'],
+                     infer_datetime_format=True)
     # categories = sorted(list(df.category.unique()))
     # category_counts = df.category.value_counts().to_dict()
     for ind, rec in df.iterrows():

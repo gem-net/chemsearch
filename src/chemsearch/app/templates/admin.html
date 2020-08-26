@@ -13,7 +13,7 @@
   <div class="panel-heading">Database admin</div>
   <div class="panel-body">
     {%- if last_rebuild %}
-        <p>Last rebuild completed at {{ last_rebuild.end_time }}.</p>
+        <p>Last rebuild completed {{ moment(last_rebuild.end_time).fromNow() }}.</p>
     {% endif -%}
     {% if in_progress_builds %}
         <div class="alert alert-success" role="alert">
