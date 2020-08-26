@@ -43,13 +43,26 @@ class Rebuild(db.Model):
     end_time = db.Column(db.DateTime, index=True, default=None)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     complete = db.Column(db.Boolean, default=False, index=True)
+    status = db.Column(db.String(255))
 
     def __repr__(self):
         return '<Rebuild {}>'.format(self.id)
 
     def get_progress_message(self):
-        initial = f"Rebuild in progress."
-        return f"{initial} Started at {self.start_time}."
+        # initial = f"Rebuild in progress."
+        # return f"{initial} Started at {self.start_time}."
+        return self.status
+
+    def set_status_and_commit(self, message):
+        self.status = message
+        db.session.add(self)
+        db.session.commit()
+
+    def mark_complete_and_commit(self):
+        self.complete = True
+        self.end_time = datetime.utcnow()
+        db.session.add(self)
+        db.session.commit()
 
 
 # class Status(db.Model):
