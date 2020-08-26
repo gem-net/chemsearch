@@ -12,6 +12,7 @@ from rdkit.Chem import AllChem
 class Molecule:
     """Basic molecule stats object."""
     fields_stat = (
+        'is_valid',
         'smiles',
         # 'smarts',
         # 'inchi',
@@ -23,15 +24,22 @@ class Molecule:
     def __init__(self, mol):
         """Build stats from rdchem.Mol object."""
         self.mol = mol
-        self.smiles = Chem.MolToSmiles(mol)
-        # self.smarts = Chem.MolToSmarts(mol)
-        # self.inchi = Chem.MolToInchi(mol)
-        self.inchi_key = Chem.MolToInchiKey(mol)  # google-able. "Phenethylcyclohexane"
-        # self.fingerprint_substructure = Chem.RDKFingerprint(mol).ToBase64()
-        morgan_fingerprint = Molecule.get_morgan_fingerprint(mol)
-        self.fingerprint_similarity_raw = morgan_fingerprint
-        # morgan_base64 = base64.b64encode(morgan_fingerprint.ToBinary()).decode('utf8')
-        # self.fingerprint_similarity = morgan_base64
+        if mol is not None:
+            self.is_valid = True
+            self.smiles = Chem.MolToSmiles(mol)
+            # self.smarts = Chem.MolToSmarts(mol)
+            # self.inchi = Chem.MolToInchi(mol)
+            self.inchi_key = Chem.MolToInchiKey(mol)  # google-able. "Phenethylcyclohexane"
+            # self.fingerprint_substructure = Chem.RDKFingerprint(mol).ToBase64()
+            self.fingerprint_similarity_raw = Molecule.get_morgan_fingerprint(mol)
+            # morgan_base64 = base64.b64encode(morgan_fingerprint.ToBinary()).decode('utf8')
+            # self.fingerprint_similarity = morgan_base64
+        else:
+            self.is_valid = False
+            self.smiles = None
+            self.inchi_key = None
+            self.fingerprint_similarity_raw = None
+
 
     @classmethod
     def get_morgan_fingerprint(cls, mol):
@@ -62,9 +70,11 @@ class LocalMolecule(Molecule):
                 self.__setattr__(field, record[field])
             self.mol_path = self._get_mol_path()
             if store_mol:
-                mol = Chem.MolFromMolFile(self.mol_path)
-                self.mol = mol
-                self.fingerprint_similarity_raw = Molecule.get_morgan_fingerprint(mol)
+                self.mol = Chem.MolFromMolFile(self.mol_path)
+                if self.mol is not None:
+                    self.fingerprint_similarity_raw = Molecule.get_morgan_fingerprint(self.mol)
+                else:
+                    self.fingerprint_similarity_raw = None
             return
         # otherwise from google drive molfile table
         self.mol_path = self._get_mol_path_from_record(record)

@@ -45,7 +45,10 @@ def assemble_archive_metadata(archive_dir=None):
         mol_dir = os.path.join(archive_dir, mol.category, mol.folder_name)
         _logger.info(f"Processing directory: {mol_dir}")
         m = LocalMolecule(mol, from_summary=False)
-        save_images(m.mol, mol_dir)
+        if m.is_valid:
+            save_images(m.mol, mol_dir)
+        else:
+            _logger.warning(f"Invalid MOL for {m.mol_name}.")
         for field in m.fields_all:
             info[field] = getattr(m, field)
         mol_info.append(info)
