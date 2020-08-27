@@ -62,7 +62,7 @@ def parse_args(args):
       :obj:`argparse.Namespace`: command line parameters namespace
     """
     parser = argparse.ArgumentParser(
-        description="Create local Molecules repository.")
+        description="Create local molecules repository.")
     parser.add_argument(
         "--version",
         action="version",

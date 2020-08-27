@@ -7,7 +7,7 @@ _logger = logging.getLogger(__name__)
 
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'hard to guess string'
-
+    APP_TITLE = os.environ.get('APP_TITLE', 'Molecules')
     USE_AUTH = os.environ.get('USE_AUTH', 'off').lower() not in {'off', 'false', '0'}
     if USE_AUTH:
         OAUTH_CREDENTIALS = {
@@ -32,7 +32,7 @@ class Config:
         ['true', 'on', '1']
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
-    MAIL_SUBJECT_PREFIX = '[Molecules]'
+    MAIL_SUBJECT_PREFIX = f'[{APP_TITLE}]'
     MAIL_SENDER = os.environ.get('MAIL_SENDER')
     MAIL_ADMIN = os.environ.get('MAIL_ADMIN')
 

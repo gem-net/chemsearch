@@ -14,15 +14,14 @@
     {% if current_user.is_authenticated %}
         {% if not current_user.in_team %}
             <p>Unfortunately your ID hasn't been recognized. Maybe you
-                have a different account associated with C-GEM?
+                have a different account associated with the team?
                 Try logging out and back in again.</p>
         {% endif %}
     {% else %}
         <div style="display:flex; flex-direction:column; align-items:center;
             min-height: 300px; justify-content:space-around">
-        <h1>Welcome to the C-GEM molecules database</h1>
-        <p style="text-align: center;">To gain access, please log in.<br/>
-        If you're not affiliated with C-GEM, why not check out our public site at <a href="http://gem-net.net">gem-net.net</a>?</p>
+        <h1>Welcome to {{ config['APP_TITLE'] }}</h1>
+        <p style="text-align: center;">If you are a team member, please log in to gain access.<br/>
         <p><a class="btn btn-primary btn-lg" href="{{ url_for('main.oauth_authorize', provider='google') }}">Log in with Google</a></p>
         </div>
     {% endif %}
