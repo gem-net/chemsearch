@@ -64,7 +64,7 @@ class LocalMolecule(Molecule):
     fields_all = tuple(list(fields_local) + list(Molecule.fields_stat))
 
     def __init__(self, record: pd.Series, from_summary=True, store_mol=True):
-        """Initialize from Google Drive molfile table or summary table record."""
+        """Initialize from scanned molfile table or summary table record."""
         if from_summary:
             for field in self.fields_all:  # populate metadata
                 self.__setattr__(field, record[field])
@@ -85,9 +85,9 @@ class LocalMolecule(Molecule):
             self.mol_name = record['folder_name']
             self.mol_filename = record['name']
             self.folder_id = record['folder_id']
-            self.category = record.category
-            self.user = record.lastModifyingUser
-            self.mod_time = record.modifiedTime
+            self.category = record['category']
+            self.user = record['lastModifyingUser']
+            self.mod_time = record['modifiedTime']
             self.mol_basename = os.path.splitext(self.mol_filename)[0]
             self.dir_url = f"https://drive.google.com/drive/u/0/folders/{self.folder_id}"
 

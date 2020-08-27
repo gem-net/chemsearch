@@ -4,6 +4,9 @@ local archive."""
 import os
 import glob
 import logging
+import datetime
+import pathlib
+import hashlib
 from collections import OrderedDict
 
 import pandas as pd
@@ -20,7 +23,7 @@ from . import drive
 _logger = logging.getLogger(__name__)
 
 
-def run_full_scan_and_rebuild_no_app():
+def run_full_scan_and_rebuild_from_drive_no_app():
     meta = drive.Meta().build()
     reload_env()
     archive_dir = os.environ['LOCAL_DB_PATH']
@@ -30,15 +33,56 @@ def run_full_scan_and_rebuild_no_app():
     return df
 
 
-def assemble_archive_metadata(archive_dir=None):
+def scan_local_archive():
+    """Builds local.tsv for local MOL files, equiv of gdrive.tsv Drive info."""
+    root = pathlib.Path(os.environ.get('LOCAL_DB_PATH'))
+    records = []
+    root_dir, test_categs, _ = next(os.walk(root, topdown=True))
+    for test_categ in test_categs:
+        categ_path = root.joinpath(test_categ)
+        _, test_mol_names, _ = next(os.walk(categ_path))
+        for test_mol_name in test_mol_names:
+            moldir_path = categ_path.joinpath(test_mol_name)
+            # Valid if moldir has MOL file
+            _, _, files = next(os.walk(moldir_path))
+            mol_files = [i for i in files if i.endswith('.mol')]
+            if len(mol_files) != 1:
+                _logger.warning(f"Skipping {test_categ} {test_mol_name}: {len(mol_files)} mol files found.")
+                continue
+            mol_file = mol_files[0]
+            mol_path = moldir_path.joinpath(mol_file)
+            md5 = _get_md5(mol_path)
+            mtime = _get_mtime(mol_path)
+            mtime_dir = _get_mtime(moldir_path)
+            record = OrderedDict({
+                'id': md5,
+                'name': mol_file,
+                'modifiedTime': mtime,
+                'lastModifyingUser': None,
+                'category': test_categ,
+                'folder_id': None,
+                'folder_name': test_mol_name,
+                'folder_modified': mtime_dir,
+                'folder_user': None,
+            })
+            records.append(record)
+    df = pd.DataFrame(data=records)
+    df.to_csv(root.joinpath('local.tsv'), sep='\t', index=False)
+    return df
+
+
+def assemble_archive_metadata(archive_dir=None, use_drive=True):
     """Assemble molecule associated data, inc images, fingerprints.
 
     Export summary table (summary.tsv) to archive directory root.
     """
     if archive_dir is None:
         os.environ.get('LOCAL_DB_PATH', 'local_db')
-    drive_data_path = os.path.join(archive_dir, 'gdrive.tsv')
-    mols = pd.read_csv(drive_data_path, sep='\t')
+    if use_drive:
+        scan_results_path = os.path.join(archive_dir, 'gdrive.tsv')
+    else:
+        scan_results_path = os.path.join(archive_dir, 'local.tsv')
+    mols = pd.read_csv(scan_results_path, sep='\t')
     mol_info = []
     for ind, mol in mols.iterrows():
         info = OrderedDict()
@@ -58,6 +102,19 @@ def assemble_archive_metadata(archive_dir=None):
     _logger.info(f"Reference images written to molecule directories.")
     _logger.info(f"Molecule identifiers and fingerprints written to {out_path}.")
     return summary
+
+
+def _get_mtime(path):
+    stats = os.stat(path)
+    return datetime.datetime.fromtimestamp(stats.st_mtime)
+
+
+def _get_md5(file_path):
+    h = hashlib.md5()
+    with open(file_path, 'rb') as infile:
+        for line in infile:
+            h.update(line)
+    return h.hexdigest()
 
 
 def save_mol_image_ipc(mol, im_path):

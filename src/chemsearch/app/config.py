@@ -36,7 +36,9 @@ class Config:
     MAIL_SENDER = os.environ.get('MAIL_SENDER')
     MAIL_ADMIN = os.environ.get('MAIL_ADMIN')
 
-    SHARED_DRIVE_ID = os.environ.get('SHARED_DRIVE_ID')
+    USE_DRIVE = os.environ.get('USE_DRIVE', 'false').lower() not in {'off', 'false', '0'}
+    if USE_DRIVE:
+        SHARED_DRIVE_ID = os.environ.get('SHARED_DRIVE_ID')
 
     LOCAL_DB_PATH = os.environ.get('LOCAL_DB_PATH')
 

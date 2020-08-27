@@ -8,7 +8,7 @@ from . import db
 from .models import Rebuild
 
 from .. import drive
-from ..admin import assemble_archive_metadata
+from ..admin import assemble_archive_metadata, scan_local_archive
 from ..db import reload_molecules
 
 
@@ -30,14 +30,20 @@ def run_full_scan_and_rebuild_async(app, build_id: str):
         _logger.addHandler(fh)
 
         build = Rebuild.query.get(build_id)  # type: Rebuild
-        build.set_status_and_commit("Identifying categories and MOL files in Drive")
-        meta = drive.Meta().build()
-
-        build.set_status_and_commit("Updating local archive.")
-        drive.create_local_archive(meta.molfiles, local_root=archive_dir,
-                                   files_resource=meta.files_resource)
+        if app.config['USE_DRIVE']:
+            build.set_status_and_commit(
+                "Identifying categories and MOL files in Drive.")
+            meta = drive.Meta().build()
+            build.set_status_and_commit("Updating local archive.")
+            drive.create_local_archive(meta.molfiles, local_root=archive_dir,
+                                       files_resource=meta.files_resource)
+        else:
+            build.set_status_and_commit(
+                "Identifying categories and MOL files in local archive.")
+            scan_local_archive()
         build.set_status_and_commit("Generating images and metadata.")
-        df = assemble_archive_metadata(archive_dir)
+        df = assemble_archive_metadata(archive_dir,
+                                       use_drive=app.config['USE_DRIVE'])
         build.set_status_and_commit(f"Completed rebuild contains {len(df)} molecules.")
         build.mark_complete_and_commit()
 

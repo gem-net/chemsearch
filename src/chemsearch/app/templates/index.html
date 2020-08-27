@@ -35,9 +35,13 @@
 </div>
 
 <div id="intro">
-    <p class="mb-0">All molecules in the
+    {%- if config['USE_DRIVE'] %}
+        <p class="mb-0">All molecules in the
         <a href="https://drive.google.com/drive/folders/{{ config['SHARED_DRIVE_ID'] }}" target="_blank">
             Shared Drive</a> are shown below.</p>
+    {% else %}
+        <p class="mb-0">All molecules in the local archive are shown below.</p>
+    {% endif -%}
 </div>
 
 {% include '_molecules.html' %}
