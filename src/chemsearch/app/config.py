@@ -9,11 +9,12 @@ class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'hard to guess string'
 
     USE_AUTH = os.environ.get('USE_AUTH', 'off').lower() not in {'off', 'false', '0'}
-    OAUTH_CREDENTIALS = {
-        'google': {
-            'id': os.environ.get('GOOGLE_CLIENT_ID'),
-            'secret': os.environ.get('GOOGLE_SECRET')
-        }
+    if USE_AUTH:
+        OAUTH_CREDENTIALS = {
+            'google': {
+                'id': os.environ.get('GOOGLE_CLIENT_ID'),
+                'secret': os.environ.get('GOOGLE_SECRET'),
+            }
         }
 
     MOLECULES_PER_PAGE = os.environ.get('MOLECULES_PER_PAGE', 15)

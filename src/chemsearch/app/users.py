@@ -22,8 +22,10 @@ def load_user(user_id):
 
 
 def _get_dir_service_handle():
-    """Get dictionary of {service_name: service_handle}."""
+    """Get dictionary of {service_name: service_handle}, else return None."""
     service_account_file = os.getenv('SERVICE_ACCOUNT_FILE')
+    if not service_account_file:
+        return None
     scopes = [
         'https://www.googleapis.com/auth/admin.directory.user.readonly',
         'https://www.googleapis.com/auth/admin.directory.group.member.readonly',
