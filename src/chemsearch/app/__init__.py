@@ -31,6 +31,9 @@ def create_app(config_name):
     migrate.init_app(app, db)
     moment.init_app(app)
 
+    from ..admin import update_paths
+    update_paths(use_drive=app.config['USE_DRIVE'])
+
     # session.init_app(app)
 
     from .main import main as main_blueprint

@@ -5,8 +5,6 @@ import logging
 import argparse
 from pkg_resources import get_distribution, DistributionNotFound
 
-from . import admin, drive
-
 
 __author__ = "Stephen Gaffney"
 __copyright__ = "Stephen Gaffney"
@@ -21,6 +19,7 @@ def main(args):
     Args:
       args ([str]): command line parameter list
     """
+    from . import admin, drive
     args = parse_args(args)
     setup_logging(args.loglevel)
     local_archive_path = args.path
