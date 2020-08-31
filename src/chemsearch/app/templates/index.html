@@ -34,7 +34,10 @@
 </div>
 
 <div id="intro">
-    {%- if config['USE_DRIVE'] %}
+    {% if molecules|length == 0 %}
+        <p class="mb-0">No molecules found in archive.</p>
+        <p class="mb-0">Make sure you have built the archive using <code>flask build</code>.</p>
+    {% elif config['USE_DRIVE'] %}
         <p class="mb-0">All molecules in the
         <a href="https://drive.google.com/drive/folders/{{ config['SHARED_DRIVE_ID'] }}" target="_blank">
             Shared Drive</a> are shown below.</p>

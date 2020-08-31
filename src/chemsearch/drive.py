@@ -50,7 +50,8 @@ class Meta:
         self.files_resource = resource
 
 
-def create_local_archive(mols, local_root=None, files_resource=None):
+def create_local_archive(mols, local_root=None, files_resource=None,
+                         scan_path=None):
     """Download all MOL files to local directory (unless they already exist).
 
     Local archive has category folders, with nested molecule directories.
@@ -58,7 +59,8 @@ def create_local_archive(mols, local_root=None, files_resource=None):
     Args:
         mols (pd.DataFrame): MOL table, output from get_mol_files.
         local_root (str): path to directory in which to store files.
-        files_resource: files API resource.
+        files_resource: files API resource
+        scan_path (str): TSV output path for Drive MOL file summary.
     """
     if not local_root:
         local_root = os.path.join(os.getcwd(), 'local_db')
@@ -66,7 +68,6 @@ def create_local_archive(mols, local_root=None, files_resource=None):
         _logger.info(f"Using {local_root} for local archive.")
     else:
         local_root = os.path.abspath(local_root)
-    mol_data_path = os.path.join(local_root, 'gdrive.tsv')  # output table
     to_download = []
     to_skip = []
     for ind, mol in mols.iterrows():
@@ -86,7 +87,9 @@ def create_local_archive(mols, local_root=None, files_resource=None):
         download_file(mol_id, save_path, files_resource=files_resource)
     if len(to_skip):
         _logger.info(f"Skipped {len(to_skip)} MOL files already in archive.")
-    mols.to_csv(mol_data_path, sep='\t', index=False)
+    if not scan_path:
+        scan_path = os.path.join(local_root, 'scan_gdrive.tsv')  # output table
+    mols.to_csv(scan_path, sep='\t', index=False)
 
 
 def get_mol_files(folders, files_resource=None):

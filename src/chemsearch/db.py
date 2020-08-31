@@ -1,23 +1,33 @@
 import os
+import logging
 
 import pandas as pd
 from rdkit.Chem import MolFromSmiles
 from rdkit.DataStructs import TanimotoSimilarity
 
 from .molecule import LocalMolecule, Molecule
+from .admin import REFERENCE_PATH
 
 
 class MolException(Exception):
     pass
 
 
+_logger = logging.getLogger(__name__)
+
+
 def load_molecules(load_rdkit_mol=True):
     # drive_path = os.path.join(LOCAL_DB_PATH, 'gdrive.tsv')
     # gd = pd.read_csv(drive_path, sep='\t')
-    local_db_path = os.environ.get('LOCAL_DB_PATH', 'local_db')
-    summary_path = os.path.join(local_db_path, 'summary.tsv')
-    df = pd.read_csv(summary_path, sep='\t', parse_dates=['mod_time'],
-                     infer_datetime_format=True)
+    if not os.path.exists(REFERENCE_PATH):
+        _logger.warning(f"Reference path not found: {REFERENCE_PATH}.")
+        return
+    _logger.info(f"Attempting to load molecule info from {REFERENCE_PATH}.")
+    try:
+        df = pd.read_csv(REFERENCE_PATH, sep='\t', parse_dates=['mod_time'],
+                         infer_datetime_format=True)
+    except pd.errors.EmptyDataError:
+        return
     # categories = sorted(list(df.category.unique()))
     # category_counts = df.category.value_counts().to_dict()
     for ind, rec in df.iterrows():

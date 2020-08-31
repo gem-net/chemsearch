@@ -23,19 +23,35 @@ from . import drive
 _logger = logging.getLogger(__name__)
 
 
+ARCHIVE_DIR = os.environ.get('LOCAL_DB_PATH')
+SCAN_RESULTS_PATH = os.path.join(ARCHIVE_DIR, 'scan_local.tsv')
+REFERENCE_PATH = os.path.join(ARCHIVE_DIR, 'master_local.tsv')
+
+
+def update_paths(use_drive=False):
+    global ARCHIVE_DIR, SCAN_RESULTS_PATH, REFERENCE_PATH
+    ARCHIVE_DIR = os.environ.get('LOCAL_DB_PATH')
+    if use_drive:
+        SCAN_RESULTS_PATH = os.path.join(ARCHIVE_DIR, 'scan_gdrive.tsv')
+        REFERENCE_PATH = os.path.join(ARCHIVE_DIR, 'master_gdrive.tsv')
+    else:
+        SCAN_RESULTS_PATH = os.path.join(ARCHIVE_DIR, 'scan_local.tsv')
+        REFERENCE_PATH = os.path.join(ARCHIVE_DIR, 'master_local.tsv')
+
+
 def run_full_scan_and_rebuild_from_drive_no_app():
     meta = drive.Meta().build()
     reload_env()
-    archive_dir = os.environ['LOCAL_DB_PATH']
-    drive.create_local_archive(meta.molfiles, local_root=archive_dir,
-                               files_resource=meta.files_resource)
-    df = assemble_archive_metadata(archive_dir)
+    drive.create_local_archive(meta.molfiles, local_root=ARCHIVE_DIR,
+                               files_resource=meta.files_resource,
+                               scan_path=SCAN_RESULTS_PATH)
+    df = assemble_archive_metadata(ARCHIVE_DIR)
     return df
 
 
 def scan_local_archive():
     """Builds local.tsv for local MOL files, equiv of gdrive.tsv Drive info."""
-    root = pathlib.Path(os.environ.get('LOCAL_DB_PATH'))
+    root = pathlib.Path(ARCHIVE_DIR)
     records = []
     root_dir, test_categs, _ = next(os.walk(root, topdown=True))
     for test_categ in test_categs:
@@ -67,22 +83,19 @@ def scan_local_archive():
             })
             records.append(record)
     df = pd.DataFrame(data=records)
-    df.to_csv(root.joinpath('local.tsv'), sep='\t', index=False)
+    df.to_csv(SCAN_RESULTS_PATH, sep='\t', index=False)
     return df
 
 
-def assemble_archive_metadata(archive_dir=None, use_drive=True):
+def assemble_archive_metadata(archive_dir=None, use_drive=False):
     """Assemble molecule associated data, inc images, fingerprints.
 
     Export summary table (summary.tsv) to archive directory root.
     """
-    if archive_dir is None:
-        os.environ.get('LOCAL_DB_PATH', 'local_db')
-    if use_drive:
-        scan_results_path = os.path.join(archive_dir, 'gdrive.tsv')
-    else:
-        scan_results_path = os.path.join(archive_dir, 'local.tsv')
-    mols = pd.read_csv(scan_results_path, sep='\t')
+    update_paths(use_drive=use_drive)
+    mols = pd.read_csv(SCAN_RESULTS_PATH, sep='\t',
+                       parse_dates=['modifiedTime', 'folder_modified'],
+                       infer_datetime_format=True)
     mol_info = []
     for ind, mol in mols.iterrows():
         info = OrderedDict()
@@ -97,10 +110,9 @@ def assemble_archive_metadata(archive_dir=None, use_drive=True):
             info[field] = getattr(m, field)
         mol_info.append(info)
     summary = pd.DataFrame.from_records(mol_info)
-    out_path = os.path.join(archive_dir, 'summary.tsv')
-    summary.to_csv(out_path, sep='\t', index=False)
+    summary.to_csv(REFERENCE_PATH, sep='\t', index=False)
     _logger.info(f"Reference images written to molecule directories.")
-    _logger.info(f"Molecule identifiers and fingerprints written to {out_path}.")
+    _logger.info(f"Molecule identifiers and fingerprints written to {REFERENCE_PATH}.")
     return summary
 
 
