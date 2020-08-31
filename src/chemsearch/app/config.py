@@ -1,8 +1,15 @@
 import os
 import logging
+import pathlib
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 _logger = logging.getLogger(__name__)
+
+
+def get_demo_dir_path():
+    package_root = pathlib.Path(__file__).parent.parent.parent.parent
+    demo_dir = str(package_root.joinpath('demo_db'))
+    return demo_dir
 
 
 class Config:
@@ -40,7 +47,9 @@ class Config:
     if USE_DRIVE:
         SHARED_DRIVE_ID = os.environ.get('SHARED_DRIVE_ID')
 
-    LOCAL_DB_PATH = os.environ.get('LOCAL_DB_PATH')
+    LOCAL_DB_PATH = os.environ.get('LOCAL_DB_PATH', get_demo_dir_path())
+    os.environ.update({'LOCAL_DB_PATH': LOCAL_DB_PATH})
+    _logger.info(f"Using {LOCAL_DB_PATH=}")
 
     @staticmethod
     def init_app(app):
