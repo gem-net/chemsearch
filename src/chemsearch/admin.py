@@ -17,7 +17,7 @@ from IPython.display import display
 from dotenv import load_dotenv, find_dotenv
 
 from .molecule import LocalMolecule
-from .plot import save_images
+from .plot import save_svg_if_not_present
 from . import drive
 
 _logger = logging.getLogger(__name__)
@@ -103,7 +103,7 @@ def assemble_archive_metadata(archive_dir=None, use_drive=False):
         _logger.info(f"Processing directory: {mol_dir}")
         m = LocalMolecule(mol, from_summary=False)
         if m.is_valid:
-            save_images(m.mol, mol_dir)
+            save_svg_if_not_present(m.mol, mol_dir)
         else:
             _logger.warning(f"Invalid MOL for {m.mol_name}.")
         for field in m.fields_all:

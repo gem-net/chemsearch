@@ -1,5 +1,6 @@
 """Plot rdkit molecule object."""
 import os
+import logging
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -9,6 +10,7 @@ from rdkit.Chem import Draw
 
 FIGSIZE = 200
 MAX_FONTSIZE = 12
+_logger = logging.getLogger(__name__)
 
 
 def plot_mol(mol):
@@ -35,14 +37,15 @@ def plot_mol(mol):
     return fig, ax
 
 
-def save_images(mol, out_dir):
-    """Save SVG and PNG images."""
-    png_path = os.path.join(out_dir, 'ref_image.png')
+def save_svg_if_not_present(mol, out_dir):
+    """Save SVG images."""
+    # png_path = os.path.join(out_dir, 'ref_image.png')
     svg_path = os.path.join(out_dir, 'ref_image.svg')
-    # import pdb; pdb.set_trace()
+    if os.path.exists(svg_path):
+        return
     # if not os.path.exists(png_path) and not os.path.exists(svg_path):
     # save_mol_as_svg(mol, svg_path)
     hf, ax = plot_mol(mol)
     hf.savefig(svg_path, bbox_inches='tight')
-    hf.savefig(png_path, bbox_inches='tight')
+    # hf.savefig(png_path, bbox_inches='tight')
     plt.close(hf)
