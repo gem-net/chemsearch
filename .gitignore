@@ -1,5 +1,6 @@
 .env
 .env.*
+creds.json
 local_db
 db.sqlite
 wiki
