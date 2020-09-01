@@ -30,7 +30,7 @@
     {% if not config['USE_AUTH'] or current_user.is_authenticated and current_user.in_team %}
 
 <div class="page-header">
-    <h1>Molecules</h1>
+    <h1>{{ config['APP_TITLE'] }}</h1>
 </div>
 
 <div id="intro">
