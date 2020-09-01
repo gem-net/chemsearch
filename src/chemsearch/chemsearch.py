@@ -31,6 +31,14 @@ def make_shell_context():
 
 
 @app.cli.command()
+def build():
+    """Run deployment tasks."""
+    from .app.rebuild import run_full_scan_and_rebuild
+    with app.app_context():
+        run_full_scan_and_rebuild(run_async=False)
+
+
+@app.cli.command()
 def deploy():
     """Run deployment tasks."""
     import shutil
