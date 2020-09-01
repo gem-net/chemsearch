@@ -65,9 +65,8 @@ def get_sim_matches(smiles):
         fp = m.fingerprint_similarity_raw
         sim = TanimotoSimilarity(fp_q, fp)
         results.append((sim, m))
-
     results.sort(key=lambda t: t[0], reverse=True)
-    sims, molecules = zip(*results)
+    sims, molecules = zip(*results) if results else ([], [])
     return sims, molecules
 
 

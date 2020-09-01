@@ -101,6 +101,10 @@ def get_mol_files(folders, files_resource=None):
     """
     mols_full = run_query("mimeType = 'chemical/x-mdl-molfile'  and trashed = false",
                           files_resource=files_resource)  # type: pd.DataFrame
+    if mols_full is None:
+        return pd.DataFrame(
+            columns=['id', 'name', 'modifiedTime', 'lastModifyingUser', 'category',
+                     'folder_id', 'folder_name', 'folder_modified', 'folder_user'])
     mols = mols_full[['id', 'name', 'modifiedTime', 'lastModifyingUser',
                       'parents', 'webContentLink']].copy()
     mols['folder_id'] = mols['parents'].transform(lambda v: v[0])
@@ -138,6 +142,8 @@ def get_mol_folders(category_dict, files_resource=None):
             df_list.append(temp)
     t2 = time.perf_counter()
     _logger.info(f"Folder lookup complete in {t2 - t1:.1f} seconds.")
+    if not df_list:
+        return pd.DataFrame()
     folders = pd.concat(df_list, axis=0, ignore_index=True)
     folder_rename = {
         'id': 'folder_id',

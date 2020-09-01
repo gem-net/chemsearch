@@ -82,7 +82,12 @@ def scan_local_archive():
                 'folder_user': None,
             })
             records.append(record)
-    df = pd.DataFrame(data=records)
+    if records:
+        df = pd.DataFrame(data=records)
+    else:
+        df = pd.DataFrame(
+            columns=['id', 'name', 'modifiedTime', 'lastModifyingUser', 'category',
+                     'folder_id', 'folder_name', 'folder_modified', 'folder_user'])
     df.to_csv(SCAN_RESULTS_PATH, sep='\t', index=False)
     return df
 
