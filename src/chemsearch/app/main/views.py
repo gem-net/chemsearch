@@ -9,7 +9,7 @@ from . import main
 from ..decorators import membership_required, admin_required
 from .forms import admin_form_from_users, EmptyForm
 from .. import db
-from ..models import User, Rebuild
+from ..models import User
 from .. import rebuild
 from ..oauth import OAuthSignIn
 from ..paging import get_page_items_or_404, get_page_count
@@ -123,15 +123,7 @@ def logout():
 @admin_required
 def reload():
     from ..rebuild import run_full_scan_and_rebuild
-    if current_user.is_anonymous:
-        r = Rebuild()
-    else:
-        r = Rebuild(current_user)
-    db.session.add(r)
-    db.session.commit()
-    start_time = r.start_time.strftime('%Y-%m-%d %H:%M')
-    r.set_status_and_commit(f"Rebuild started at {start_time}.")
-    run_full_scan_and_rebuild(r.id)
+    run_full_scan_and_rebuild(current_user)
     return redirect(url_for('main.admin'))
 
 
