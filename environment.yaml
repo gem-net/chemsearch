@@ -25,6 +25,7 @@ dependencies:
   - Flask-Login
   - Flask-SQLAlchemy
   - rauth
+  - Flask-Moment
   - pip:
     - gspread
     - pyscaffold
