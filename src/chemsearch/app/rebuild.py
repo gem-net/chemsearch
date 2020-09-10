@@ -13,7 +13,7 @@ def run_full_scan_and_rebuild(user=None, run_async=True):
     if user is None or user.is_anonymous:
         r = Rebuild()
     else:
-        r = Rebuild(user)
+        r = Rebuild(user_id=user.id)
     db.session.add(r)
     db.session.commit()
     start_time = r.start_time.strftime('%Y-%m-%d %H:%M')
