@@ -39,6 +39,12 @@ def build():
 
 
 @app.cli.command()
+def link_data():
+    from .app import link_data
+    link_data(app)
+
+
+@app.cli.command()
 def deploy():
     """Run deployment tasks."""
     import shutil

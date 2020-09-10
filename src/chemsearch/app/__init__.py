@@ -1,3 +1,5 @@
+import os
+import pathlib
 from datetime import datetime
 
 from flask import Flask, g
@@ -54,4 +56,30 @@ def create_app(config_name):
                 current_user.in_team = current_user.social_id in g.members_dict
                 db.session.commit()
 
+    @app.before_first_request
+    def before_first_request():
+        link_data(app)
+
     return app
+
+
+def link_data(app):
+    local_db_path = os.path.abspath(app.config['LOCAL_DB_PATH'])
+    static_path = app.static_folder
+    data_path = pathlib.Path(static_path).joinpath('data')
+
+    symlink_needed = False
+    if os.path.exists(data_path):
+        current_target = os.readlink(data_path)
+        if current_target != local_db_path:
+            app.logger.info(f"Updating static/data target.")
+            os.remove(data_path)
+            symlink_needed = True
+        else:
+            app.logger.info(f"Current static/data target is correct.")
+    else:
+        symlink_needed = True
+        app.logger.info("Creating static/data link.")
+    if symlink_needed:
+        data_path.symlink_to(local_db_path, target_is_directory=True)
+        app.logger.info(f"New data directory is {local_db_path}.")
