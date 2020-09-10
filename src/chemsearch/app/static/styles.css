@@ -53,10 +53,11 @@
 .mol-thumb-box {
     width: 120px;
     min-width: 120px;
-    height: 120px;
+    /*height: 120px;*/
     /*border: 2px solid #337ab7;*/
     margin-right: 2rem;
     display: flex;
+    align-content: center;
     justify-content: center;
 }
 .mol-thumb-img {
