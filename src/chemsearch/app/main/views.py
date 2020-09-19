@@ -11,6 +11,7 @@ from .forms import admin_form_from_users, EmptyForm
 from .. import db
 from ..models import User
 from .. import rebuild
+from .. import filters
 from ..oauth import OAuthSignIn
 from ..paging import get_page_items_or_404, get_page_count
 from ...db import get_substructure_matches, get_sim_matches, MolException, LOCAL_MOLECULES
@@ -22,13 +23,15 @@ _logger = logging.getLogger(__name__)
 @main.route('/', methods=['GET', 'POST'])
 def index():
     if not current_app.config['USE_AUTH'] or not current_user.is_anonymous and current_user.in_team:
+        pass_mols, filter_dict = filters.filter_mols(LOCAL_MOLECULES, request.args)
+        filterable = filters.count_filterable(pass_mols)
         page_no = request.args.get('page', 1, type=int)
-        molecules = get_page_items_or_404(LOCAL_MOLECULES, page_no)
-        n_pages = get_page_count(len(LOCAL_MOLECULES))
+        molecules = get_page_items_or_404(pass_mols, page_no)
+        n_pages = get_page_count(len(pass_mols))
+        return render_template('index.html', molecules=molecules, n_pages=n_pages,
+                               filters=filter_dict, filterable=filterable)
     else:
-        molecules = None
-        n_pages = 0
-    return render_template('index.html', molecules=molecules, n_pages=n_pages)
+        return render_template('index.html')
 
 
 @main.route('/search', methods=['GET', 'POST'])
@@ -45,6 +48,7 @@ def results():
         smiles: str
         search_type: in ('similarity', 'substructure')
     """
+    pass_mols, filter_dict = filters.filter_mols(LOCAL_MOLECULES, request.args)
     smiles = request.args.get('smiles')
     search_type = request.args.get('search_type')
     if smiles in (None, '') or search_type in (None, ''):
@@ -53,7 +57,7 @@ def results():
     page_no = request.args.get('page', 1, type=int)
     if search_type == 'substructure':
         try:
-            molecules_all = get_substructure_matches(smiles)
+            molecules_all = get_substructure_matches(smiles, mols=pass_mols)
         except MolException as e:
             flash(str(e), "error")
             return redirect(url_for('.search'))
@@ -63,7 +67,7 @@ def results():
         sims = None  # no similarity scores for this search type
     elif search_type == 'similarity':
         try:
-            sims_all, molecules_all = get_sim_matches(smiles)
+            sims_all, molecules_all = get_sim_matches(smiles, mols=pass_mols)
         except MolException as e:
             flash(str(e), "error")
             return redirect(url_for('.search'))
@@ -72,9 +76,11 @@ def results():
         sims = get_page_items_or_404(sims_all, page_no)
     else:
         abort(404, "Unrecognized search type.")
+    filterable = filters.count_filterable(molecules)
     return render_template('results.html', smiles=smiles,
                            molecules=molecules, sims=sims,
-                           search_type=search_type, n_pages=n_pages)
+                           search_type=search_type, n_pages=n_pages,
+                           filters=filter_dict, filterable=filterable)
 
 
 @main.route('/admin', methods=['GET', 'POST'])

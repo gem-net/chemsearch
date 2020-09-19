@@ -46,22 +46,24 @@ def get_single_molecule():
     return mol
 
 
-def get_substructure_matches(smiles):
+def get_substructure_matches(smiles, mols=None):
     """Get LocalMolecule matches with smiles as substructure"""
     query = MolFromSmiles(smiles)
     if query is None:
         raise MolException("Error building molecule from input.")
-    matches = [i for i in LOCAL_MOLECULES if i.mol.HasSubstructMatch(query)]
+    mols = LOCAL_MOLECULES if mols is None else mols
+    matches = [i for i in mols if i.mol.HasSubstructMatch(query)]
     return matches
 
 
-def get_sim_matches(smiles):
+def get_sim_matches(smiles, mols=None):
     query = MolFromSmiles(smiles)
     if query is None:
         raise MolException("Error building molecule from input.")
     fp_q = Molecule.get_morgan_fingerprint(query)
     results = []
-    for m in LOCAL_MOLECULES:
+    mols = LOCAL_MOLECULES if mols is None else mols
+    for m in mols:
         fp = m.fingerprint_similarity_raw
         sim = TanimotoSimilarity(fp_q, fp)
         results.append((sim, m))

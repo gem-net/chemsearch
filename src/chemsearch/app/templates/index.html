@@ -34,17 +34,21 @@
 </div>
 
 <div id="intro">
-    {% if molecules|length == 0 %}
+    {% if molecules|length == 0  and not filters %}{# empty archive #}
         <p class="mb-0">No molecules found in archive.</p>
         <p class="mb-0">Make sure you have built the archive using <code>flask build</code>.</p>
+    {% elif molecules|length == 0 %}{# empty subset #}
+        <p class="mb-0">No matching molecules found.</p>
     {% elif config['USE_DRIVE'] %}
-        <p class="mb-0">All molecules in the
+        <p class="mb-0">Molecules from the
         <a href="https://drive.google.com/drive/folders/{{ config['SHARED_DRIVE_ID'] }}" target="_blank">
             Shared Drive</a> are shown below.</p>
     {% else %}
         <p class="mb-0">All molecules in the local archive are shown below.</p>
     {% endif -%}
 </div>
+
+{% include '_filters.html' %}
 
 {% include '_molecules.html' %}
 

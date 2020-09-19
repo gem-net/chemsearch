@@ -1,0 +1,15 @@
+
+{% for attr, counts in filterable.items() %}
+<div>
+    <strong>{{ attr }}</strong>
+    {% for val, n in counts.items() %}
+        {% if (attr, val) in filters.items() %}
+            {% set btn_class = "btn-info" %}
+        {% else %}
+            {% set btn_class = "btn-default" %}
+        {% endif %}
+        <a class="button btn {{ btn_class }}"
+          href="{{ url_for(request.endpoint, **get_updated_args(attr, val)) }}">{{ val }} ({{ n }})</a>
+    {% endfor %}{# end of attr_value loop #}
+</div>
+{% endfor %}

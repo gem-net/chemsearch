@@ -2,7 +2,7 @@ import os
 import pathlib
 from datetime import datetime
 
-from flask import Flask, g
+from flask import Flask, g, request
 from flask_bootstrap import Bootstrap
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import current_user, LoginManager
@@ -59,6 +59,15 @@ def create_app(config_name):
     @app.before_first_request
     def before_first_request():
         link_data(app)
+
+    @app.context_processor
+    def utility_processor():
+        from .filters import update_args
+
+        def get_updated_args(attr, val):
+            return update_args(request.args, attr, val)
+
+        return dict(get_updated_args=get_updated_args)
 
     return app
 

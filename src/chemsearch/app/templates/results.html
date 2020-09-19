@@ -19,6 +19,7 @@
 
 <div id="results-div">
 {% if molecules %}
+    {% include '_filters.html' %}
     {% include '_molecules.html' %}
 {% else %}
     <p>No matches found.</p>
