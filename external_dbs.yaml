@@ -1,0 +1,10 @@
+# USE <INCHIKEY> IN TEMPLATE AS PLACEHOLDER FOR InChiKey
+UniChem: https://www.ebi.ac.uk/unichem/frontpage/results?queryText=<INCHIKEY>&kind=InChIKey&sources=&incl=exclude
+PubChem: https://pubchem.ncbi.nlm.nih.gov/#query=<INCHIKEY>
+Entrez: https://www.ncbi.nlm.nih.gov/pccompound/?term=<INCHIKEY>
+Chemspider: https://www.chemspider.com/Search.aspx?q=<INCHIKEY>
+Names: https://cactus.nci.nih.gov/chemical/structure/InChIKey=<INCHIKEY>/names
+Google: https://www.google.com/search?q=<INCHIKEY>
+# PATENTSCOPE: https://patentscope.wipo.int/search/en/result.jsf?inchikey=<INCHIKEY>
+# Json: https://www.ebi.ac.uk/unichem/rest/verbose_inchikey/<INCHIKEY>
+

@@ -53,8 +53,10 @@ def create_app(config_name):
 
     @app.before_request
     def before_request():
-        from .users import update_g
-        update_g()
+        from .users import MEMBERS_DICT
+        g.members_dict = MEMBERS_DICT
+        from .refs import TEMPLATES
+        g.db_templates = TEMPLATES
         if app.config['USE_AUTH']:
             if current_user.is_authenticated:
                 current_user.last_seen = datetime.utcnow()

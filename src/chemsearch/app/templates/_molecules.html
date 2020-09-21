@@ -18,6 +18,10 @@
                     <div class="mol-user"><a class="text-muted" href="{{ url_for('main.index', user=mol.user) }}">{{ mol.user }}</a></div>
                 {% endif -%}
                 <div class="mol-modtime"><span class="text-muted">{{ moment(mol.mod_time).calendar() }}</span></div>
+                {% for db_name in g.db_templates %}
+                    {% set db_url = g.db_templates[db_name]|replace("<INCHIKEY>", mol.inchi_key) %}
+                    <a href="{{ db_url }}" target="_blank">{{ db_name }}</a>
+                {% endfor %}
             </div>
         </div>
     {#  mol.__dict__   #}

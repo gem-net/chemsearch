@@ -90,10 +90,6 @@ def find_user_by_email(find_email):
     return user
 
 
-def update_g():
-    g.members_dict = MEMBERS_DICT
-
-
 def update_members_dict_from_config(app):
     """Update members dictionary."""
     if not app.config['USE_AUTH']:
