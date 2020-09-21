@@ -14,7 +14,8 @@ from .. import rebuild
 from .. import filters
 from ..oauth import OAuthSignIn
 from ..paging import get_page_items_or_404, get_page_count
-from ...db import get_substructure_matches, get_sim_matches, MolException, LOCAL_MOLECULES
+from ...db import get_substructure_matches, get_sim_matches, MolException, \
+    LOCAL_MOLECULES, MOLECULE_DICT
 
 
 _logger = logging.getLogger(__name__)
@@ -32,6 +33,15 @@ def index():
                                filters=filter_dict, filterable=filterable)
     else:
         return render_template('index.html')
+
+
+@main.route('/molecule/<inchi_key>', methods=['GET', 'POST'])
+@membership_required
+def molecule(inchi_key):
+    mol = MOLECULE_DICT.get(inchi_key)
+    if mol is None:
+        abort(404, 'Molecule not found.')
+    return render_template('molecule.html', mol=mol)
 
 
 @main.route('/search', methods=['GET', 'POST'])

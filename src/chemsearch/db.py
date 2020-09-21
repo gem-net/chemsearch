@@ -73,3 +73,4 @@ def get_sim_matches(smiles, mols=None):
 
 
 LOCAL_MOLECULES = list(load_molecules(load_rdkit_mol=True))
+MOLECULE_DICT = {i.inchi_key: i for i in LOCAL_MOLECULES}

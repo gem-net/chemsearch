@@ -11,7 +11,8 @@
                     <div class="mol-sim"><code>SIMILARITY {{ sim|round(3) }}</code></div>
                 {% endif -%}
                 <div class="mol-categ"><code><a href="{{ url_for('main.index', category=mol.category) }}">{{ mol.category }}</a></code></div>
-                <div class="mol-name dont-break-out"><span>{{ mol.mol_name }}</span></div>
+                <div class="mol-name dont-break-out">
+                    <a href="{{ url_for('main.molecule', inchi_key=mol.inchi_key) }}">{{ mol.mol_name }}</a></div>
                 <div class="mol-inchi"><span class="mol-inchikey">{{ mol.inchi_key }}</span></div>
                 {%- if config['USE_DRIVE'] %}
                     <div class="mol-dir"><a href="{{ mol.dir_url }}" target="_blank">Directory</a></div>
