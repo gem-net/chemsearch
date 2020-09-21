@@ -42,6 +42,9 @@ def create_app(config_name):
     app.register_blueprint(main_blueprint)
     # update_members_dict(app)
 
+    from .filters import set_filters_using_config
+    set_filters_using_config(app)
+
     with app.app_context():
         db.create_all()
 

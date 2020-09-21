@@ -1,10 +1,7 @@
 from collections import Counter
 
 
-ALLOWED_FILTERS = (
-    'user',
-    'category',
-)
+ALLOWED_FILTERS = tuple()  # set by set_filters_using_config
 
 
 def get_filters_from_args(args):
@@ -36,6 +33,7 @@ def count_filterable(mols):
 def update_args(args, attr, val):
     """Get updated copy of args dictionary, popping attr if val is None.
 
+    Aids creation of links that modify URL arguments of current page.
     - add (attr, val) if not present in args.
     - update attr if present in args.
     - if val is None, pop attr.
@@ -48,3 +46,16 @@ def update_args(args, attr, val):
     else:
         new_args.update({attr: val})
     return new_args
+
+
+def set_filters_using_config(app):
+    global ALLOWED_FILTERS
+    if app.config['USE_DRIVE']:
+        ALLOWED_FILTERS = (
+            'user',
+            'category',
+        )
+    else:
+        ALLOWED_FILTERS = (
+            'category',
+        )
