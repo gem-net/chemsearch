@@ -10,8 +10,8 @@ from . import login_manager
 from .models import User
 
 logger = logging.getLogger(__name__)
-MEMBERS_DICT = {}  # updated at end of module
-# DIR_SERVICE_HANDLE = None  # saved at end of module
+MEMBERS_DICT = {}  # updated at startup with update_members_dict_from_config
+DIR_SERVICE_HANDLE = None  # set at app startup
 
 
 @login_manager.user_loader
@@ -21,27 +21,27 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 
 
-def _get_dir_service_handle():
+def _set_service_handle_using_config(app):
     """Get dictionary of {service_name: service_handle}, else return None."""
-    service_account_file = os.getenv('SERVICE_ACCOUNT_FILE')
-    if not service_account_file:
-        return None
+    global DIR_SERVICE_HANDLE
+    if not app.config['USE_DRIVE'] and not app.config['USE_AUTH']:
+        app.logger.info("Skipping DIR service creation (Drive/Auth only).")
+        return
+    service_account_file = app.config['SERVICE_ACCOUNT_FILE']
     scopes = [
         'https://www.googleapis.com/auth/admin.directory.user.readonly',
         'https://www.googleapis.com/auth/admin.directory.group.member.readonly',
         ]
-
     credentials = service_account.Credentials.from_service_account_file(
         service_account_file, scopes=scopes)
     delegated_credentials = credentials.with_subject(
-        os.environ.get('CREDENTIALS_AS_USER'))
-    dir_service = build('admin', 'directory_v1', credentials=delegated_credentials,
-                        cache_discovery=False)
+        app.config['CREDENTIALS_AS_USER'])
+    DIR_SERVICE_HANDLE = build('admin', 'directory_v1',
+                               credentials=delegated_credentials,
+                               cache_discovery=False)
 
-    return dir_service
 
-
-def _get_members_dict():
+def _get_members_dict(app):
     """Get dictionary of {google_id: email_address}.
 
     Return:
@@ -50,7 +50,7 @@ def _get_members_dict():
     service = DIR_SERVICE_HANDLE
 
     # GOOGLE GROUP MEMBERS
-    group_key = os.environ.get('GROUP_KEY', None)
+    group_key = app.config.get('GROUP_KEY', None)
     logging.info("Looking up group members list.")
     res = service.members().list(groupKey=group_key).execute()
     members_dict = {i['id']: i['email'] for i in res['members'] if 'email' in i}
@@ -94,14 +94,12 @@ def update_g():
     g.members_dict = MEMBERS_DICT
 
 
-def update_members_dict():
-    """Update members dictionary"""
-    global MEMBERS_DICT
-    if os.environ.get('USE_AUTH', 'false').lower() not in {'0', 'off', 'false'}:
-        MEMBERS_DICT.clear()
-        new_dict = _get_members_dict()
-        MEMBERS_DICT.update(new_dict)
-
-
-DIR_SERVICE_HANDLE = _get_dir_service_handle()
-update_members_dict()
+def update_members_dict_from_config(app):
+    """Update members dictionary."""
+    if not app.config['USE_AUTH']:
+        return
+    if DIR_SERVICE_HANDLE is None:
+        _set_service_handle_using_config(app)
+    new_dict = _get_members_dict(app)
+    MEMBERS_DICT.clear()
+    MEMBERS_DICT.update(new_dict)

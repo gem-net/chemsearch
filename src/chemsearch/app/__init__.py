@@ -42,8 +42,11 @@ def create_app(config_name):
     app.register_blueprint(main_blueprint)
     # update_members_dict(app)
 
+    # SET CONFIG_DEPENDENT MODULE ATTRIBUTES
     from .filters import set_filters_using_config
     set_filters_using_config(app)
+    from .users import update_members_dict_from_config
+    update_members_dict_from_config(app)
 
     with app.app_context():
         db.create_all()

@@ -46,6 +46,11 @@ class Config:
     USE_DRIVE = os.environ.get('USE_DRIVE', 'false').lower() not in {'off', 'false', '0'}
     if USE_DRIVE:
         SHARED_DRIVE_ID = os.environ.get('SHARED_DRIVE_ID')
+    if USE_DRIVE or USE_AUTH:
+        SERVICE_ACCOUNT_FILE = os.environ.get('SERVICE_ACCOUNT_FILE')
+        CREDENTIALS_AS_USER = os.environ.get('CREDENTIALS_AS_USER')
+    if USE_AUTH:
+        GROUP_KEY = os.environ.get('GROUP_KEY')
 
     LOCAL_DB_PATH = os.environ.get('LOCAL_DB_PATH', get_demo_dir_path())
     os.environ.update({'LOCAL_DB_PATH': LOCAL_DB_PATH})
