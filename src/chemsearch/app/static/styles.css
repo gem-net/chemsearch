@@ -1,9 +1,11 @@
-#admin-db {
-
+#mol-img-onepage {
+    height: 200px;
 }
 
-#admin-users {
-
+#mol-img-onepage img {
+    height: 200px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 #draw-section {
@@ -21,7 +23,7 @@
     margin-top: 3rem;
 }
 
-.mol-categ code {
+.mol-categ a {
     color: #6f3fada6; /*#303080;  /*#337ab7*/
 }
 
@@ -83,6 +85,9 @@
 .mol-name {
     font-size: large;
     font-weight: bolder;
+}
+.mol-name a {
+    color: #333;
 }
 .mol-categ {
 

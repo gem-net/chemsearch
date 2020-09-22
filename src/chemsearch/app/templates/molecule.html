@@ -7,27 +7,33 @@
     <h1>{{ mol.mol_name }}</h1>
 </div>
 
-<div id="summary-div">
-
-    <div class="mol">
-        <div class="mol-thumb-box">
-            <div><img class="img-responsive img-rounded mol-thumb-img" loading="lazy" src="{{ mol.url_svg }}"></div>
-        </div>
-        <div class="mol-content">
-            <div class="mol-categ"><code><a href="{{ url_for('main.index', category=mol.category) }}">{{ mol.category }}</a></code></div>
-            <div class="mol-inchi"><span class="mol-inchikey">{{ mol.inchi_key }}</span></div>
-            {%- if config['USE_DRIVE'] %}
-                <div class="mol-dir"><a href="{{ mol.dir_url }}" target="_blank">Directory</a></div>
-                <div class="mol-user"><a class="text-muted" href="{{ url_for('main.index', user=mol.user) }}">{{ mol.user }}</a></div>
-            {% endif -%}
-            <div class="mol-modtime"><span class="text-muted">{{ moment(mol.mod_time).calendar() }}</span></div>
-            {% for db_name in g.db_templates %}
+<figure>
+    <div id="mol-img-onepage"><img class="img-responsive img-rounded" loading="lazy" src="{{ mol.url_svg }}"></div>
+</figure>
+<table class="table table-striped table-hover">
+    <tbody>
+    <tr><th>Category</th>
+        <td><a href="{{ url_for('main.index', category=mol.category) }}">{{ mol.category }}</a></td></tr>
+    <tr><th>InChIKey</th>
+        <td>{{ mol.inchi_key }}</td></tr>
+    <tr><th>Smiles</th>
+        <td>{{ mol.smiles }}</td></tr>
+    {%- if config['USE_DRIVE'] %}
+    <tr><th>Directory</th>
+        <td><a href="{{ mol.dir_url }}" target="_blank">{{ mol.dir_url }}</a></td></tr>
+    <tr><th>User</th>
+        <td><a href="{{ url_for('main.index', user=mol.user) }}">{{ mol.user }}</a></td></tr>
+    {% endif %}
+        <tr><th>Modified</th>
+        <td>{{ moment(mol.mod_time).calendar() }}</td></tr>
+    <tr><th>XRefs</th>
+        <td>
+        {% for db_name in g.db_templates %}
                 {% set db_url = g.db_templates[db_name]|replace("<INCHIKEY>", mol.inchi_key) %}
-                <a href="{{ db_url }}" target="_blank">{{ db_name }}</a>
-            {% endfor %}
-        </div>
-    </div>
-
-</div>
+                <a href="{{ db_url }}" class="btn btn-sm btn-default" target="_blank">{{ db_name }}</a>
+        {% endfor %}
+        </td></tr>
+    </tbody>
+</table>
 
 {% endblock %}
