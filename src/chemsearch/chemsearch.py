@@ -1,7 +1,7 @@
 """
 Run app with `flask run`
 or
-`gunicorn -b 0.0.0.0:5005 -w 4 src.journal_choice.journals:app`
+`gunicorn -b 0.0.0.0:5005 -w 2 --threads=4 --worker-class=gthread src.chemsearch.chemsearch:app`
 """
 import os
 import sys

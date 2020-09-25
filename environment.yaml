@@ -26,6 +26,7 @@ dependencies:
   - Flask-SQLAlchemy
   - rauth
   - Flask-Moment
+  - beautifulsoup4
   - pip:
     - gspread
     - pyscaffold

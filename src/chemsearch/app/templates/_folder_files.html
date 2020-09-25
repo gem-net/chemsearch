@@ -1,0 +1,25 @@
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title">File listing</h3>
+    </div>
+    <div id="file-listing" class="table table-responsive">
+        <table class="table table-condensed table-hover">
+            <thead><tr>
+                <th>File</th>
+                <th>Modified</th>
+                <th>Modified by</th>
+            </tr></thead>
+            <tbody>
+            {% for ind, row in df.iterrows() %}
+            <tr>
+                <td><a href="{{ row.loc['webViewLink'] }}" target="_blank">
+                    <span class="mr-1"><img class="mt-1" src="{{ row.loc['iconLink'] }}" alt="icon"></span>
+                    {{ row['name'] }}</a></td>
+                <td>{{ row['lastModifyingUser'] }}</td>
+                <td>{{ moment(row['modifiedTime']).calendar() }}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>

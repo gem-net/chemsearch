@@ -8,6 +8,10 @@
     margin-right: auto;
 }
 
+.copy-btn {
+    margin-left: 1rem;
+}
+
 #draw-section {
     display: flex;
 }

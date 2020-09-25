@@ -8,7 +8,7 @@ from flask_login import login_user, logout_user,\
 from . import main
 from ..decorators import membership_required, admin_required
 from .forms import admin_form_from_users, EmptyForm
-from .. import db
+from .. import db, META
 from ..models import User
 from .. import rebuild
 from .. import filters
@@ -16,6 +16,7 @@ from ..oauth import OAuthSignIn
 from ..paging import get_page_items_or_404, get_page_count
 from ...db import get_substructure_matches, get_sim_matches, MolException, \
     LOCAL_MOLECULES, MOLECULE_DICT
+from ... import drive
 
 
 _logger = logging.getLogger(__name__)
@@ -42,6 +43,19 @@ def molecule(inchi_key):
     if mol is None:
         abort(404, 'Molecule not found.')
     return render_template('molecule.html', mol=mol)
+
+
+@main.route('/custom/<inchi_key>', methods=['POST'])
+@membership_required
+def custom_info(inchi_key):
+    mol = MOLECULE_DICT.get(inchi_key)
+    if mol is None:
+        abort(404, 'Molecule not found.')
+    df, rec, content = drive.get_file_listing_and_custom_info(
+        mol, files_resource=META.files_resource)
+    custom_html = render_template('_custom.html', content=content, rec=rec)
+    listing_html = render_template('_folder_files.html', df=df)
+    return {'listing': listing_html, 'custom': custom_html}
 
 
 @main.route('/search', methods=['GET', 'POST'])

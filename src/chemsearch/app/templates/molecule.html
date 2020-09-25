@@ -10,7 +10,13 @@
 <figure>
     <div id="mol-img-onepage"><img class="img-responsive img-rounded" loading="lazy" src="{{ mol.url_svg }}"></div>
 </figure>
-<table class="table table-striped table-hover">
+
+<div id="mol-properties-container">
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Molecule metadata</h3>
+  </div>
+<table class="table table-hover">
     <tbody>
     <tr><th>Category</th>
         <td><a href="{{ url_for('main.index', category=mol.category) }}">{{ mol.category }}</a></td></tr>
@@ -44,6 +50,14 @@
         </td></tr>
     </tbody>
 </table>
+</div>
+</div>
+
+<div id="spinner" class="hidden"><img src="{{ url_for('static', filename='loading.gif') }}" alt="">&nbsp;Loading custom info and file listing...</div>
+
+<div id="file-listing-container" class="hidden"></div>
+
+<div id="custom-info-container" class="hidden"></div>
 
 {% endblock %}
 
@@ -54,6 +68,16 @@
 <script>
 $(function () {
     $('[data-toggle="tooltip"]').tooltip()
+    const spinner_id = '#spinner';
+    const custom_id = '#custom-info-container';
+    const listing_id = '#file-listing-container';
+    load_custom_info(listing_id, custom_id, spinner_id)
+
+    const btn_inchikey = document.querySelector('#btn_inchikey');
+    btn_inchikey.addEventListener('click', get_copy_fn('#val_inchikey'))
+
+    const btn_smiles = document.querySelector('#btn_smiles');
+    btn_smiles.addEventListener('click', get_copy_fn('#val_smiles'))
 })
 
 const get_copy_fn = target_selector => {
@@ -73,13 +97,24 @@ const get_copy_fn = target_selector => {
       }
 }
 
-const btn_inchikey = document.querySelector('#btn_inchikey');
-btn_inchikey.addEventListener('click', get_copy_fn('#val_inchikey'))
-
-const btn_smiles = document.querySelector('#btn_smiles');
-btn_smiles.addEventListener('click', get_copy_fn('#val_smiles'))
-
-
+function load_custom_info(listingElem, customElem, loadingElem) {
+    console.log('Loading file listing and custom info.')
+    $(loadingElem).removeClass("hidden")
+    $.post('{{ url_for("main.custom_info", inchi_key=mol.inchi_key) }}', {
+    }).done(function(response) {
+        $(loadingElem).hide()
+        $(customElem).html(response['custom'])
+        console.log(response['custom'])
+        $(listingElem).html(response['listing'])
+        $(customElem).removeClass("hidden")
+        $(listingElem).removeClass("hidden")
+        flask_moment_render_all()
+    }).fail(function() {
+        {#$(loadingElem).hide()#}
+        console.log("Listing + custom info lookup failed.")
+        $(loadingElem).text("Error: Could not contact server.");
+    });
+}
 </script>
 
 {% endblock %}

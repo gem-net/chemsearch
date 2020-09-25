@@ -1,0 +1,18 @@
+{% if content is none %}
+    <p class="text-muted">This molecule does not have associated custom data.</p>
+{% else %}
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Custom info</h3>
+  </div>
+  <div id="custom-info" class="panel-body">
+      {{ content | safe }}
+  </div>
+  <div class="panel-footer small">
+      <span>From <a href="{{ rec.loc['webViewLink'] }}" target="_blank">
+            <span><img src="{{ rec.loc['iconLink'] }}" alt="icon"></span>
+            {{ rec['name'] }}</a> (Modified by {{ rec['lastModifyingUser'] }}
+            {{ moment(rec['modifiedTime']).fromNow()}}.)</span>
+  </div>
+</div>
+{% endif %}

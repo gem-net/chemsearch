@@ -12,6 +12,7 @@ from flask_moment import Moment
 # from flask_session import Session
 
 from .config import config
+from ..drive import Meta
 
 
 bootstrap = Bootstrap()
@@ -20,6 +21,8 @@ login_manager = LoginManager()
 migrate = Migrate()
 moment = Moment()
 # login_manager.login_view = 'main.index'
+
+META = Meta()
 
 
 def create_app(config_name):

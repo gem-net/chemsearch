@@ -1,5 +1,5 @@
 """Queries Drive API to identify categories and MOL files. Builds local archive."""
-
+import io
 import os
 import time
 import logging
@@ -7,12 +7,22 @@ import logging
 import pandas as pd
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
-from googleapiclient.http import MediaIoBaseDownload
+from googleapiclient.http import MediaIoBaseDownload, HttpError
+from bs4 import BeautifulSoup
 
 from .helpers import parse_timestamp_str
 
 
 _logger = logging.getLogger(__name__)
+GDOC_MIMETYPE = 'application/vnd.google-apps.document'
+TXT_MIMETYPE = 'text/plain'
+
+MIME_MAP = {
+    GDOC_MIMETYPE: ('text/html', '.html'),  # ('application/pdf', '.pdf'),  # Google Docs
+    'application/vnd.google-apps.spreadsheet':
+        ('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', '.xlsx'),  # Google Sheets
+    'application/vnd.google-apps.presentation': ('application/pdf', '.pdf'),  # Google Slides
+}
 
 
 class Meta:
@@ -22,7 +32,7 @@ class Meta:
         self.category_dict = dict()
         self.folders = pd.DataFrame()
         self.molfiles = pd.DataFrame()
-        self.files_resource = None
+        self._files_resource = None
 
     def build(self):
         """Gather all metadata using Drive API."""
@@ -45,9 +55,15 @@ class Meta:
         last_mod = self.molfiles.modifiedTime.sort_values(ascending=False).iloc[0]
         return int(last_mod.timestamp())
 
+    @property
+    def files_resource(self):
+        if self._files_resource is None:
+            self._load_files_resource()
+        return self._files_resource
+
     def _load_files_resource(self):
         resource = get_files_service().files()
-        self.files_resource = resource
+        self._files_resource = resource
 
 
 def create_local_archive(mols, local_root=None, files_resource=None,
@@ -174,7 +190,8 @@ def run_query(query, page_size=1000, as_df=True, file_fields=None,
     if not file_fields:
         file_cols = ['name', 'id', 'kind', 'parents', 'mimeType', 'createdTime',
                      'modifiedTime', 'trashed', 'explicitlyTrashed',
-                     'lastModifyingUser/displayName', 'webContentLink']
+                     'lastModifyingUser/displayName', 'webContentLink',
+                     'iconLink', 'webViewLink']
         file_fields = f"nextPageToken, files({', '.join(file_cols)})"
 
     page_token = None
@@ -232,3 +249,103 @@ def download_file(file_id, save_path, files_resource=None):
         done = False
         while done is False:
             status, done = downloader.next_chunk()
+
+
+def get_file_listing_and_custom_info(mol, files_resource=None):
+    """Get molecule top-level folder listing and custom file info.
+
+    Returns:
+        df (pd.DataFrame, None): metadata for files in top-level molecule folder.
+        rec (pd.Series, None): df row corresponding to custom file.
+        content (html, None): content of custom file, in html.
+    """
+    df = scan_folder(mol.folder_id, files_resource=files_resource)
+    if type(df) is not pd.DataFrame:
+        _logger.info("Folder lookup failed for %s.", mol)
+        return None, None, None
+    rec, content = _get_custom_record_and_content_from_folder_df(df)
+    if rec is None:
+        _logger.info("No custom file found.")
+        return df, None, None
+    return df, rec, content
+
+
+def _get_custom_record_and_content_from_folder_df(df):
+    content, content_type = None, None
+    rec = _get_custom_file_record_if_exists(df)  # pd.Series or None
+    if type(rec) is not pd.Series:
+        return None, None
+    file_id, mimetype = rec['id'], rec['mimeType']
+    try:
+        if mimetype == GDOC_MIMETYPE:
+            content = _get_doc_html_body_string(file_id)
+        elif mimetype == TXT_MIMETYPE:
+            content = _get_txt_file_as_string(file_id)
+            content = f"<pre>{content}</pre>"
+    except HttpError:
+        _logger.info(f"Failed file lookup for record %s", rec.to_dict())
+        return None, None
+    return rec, content
+
+
+def _get_custom_file_record_if_exists(df):
+    is_gdoc = df['mimeType'] == GDOC_MIMETYPE
+    name_is_custom = df['name'].apply(lambda v: os.path.splitext(v)[0].lower() == 'custom')
+
+    gdoc_match = is_gdoc & name_is_custom
+    if gdoc_match.sum() == 1:
+        rec = df[gdoc_match].iloc[0]
+        return rec
+    is_txt = df['mimeType'] == TXT_MIMETYPE
+    txt_match = is_txt & name_is_custom
+    if txt_match.sum() == 1:
+        rec = df[txt_match].iloc[0]
+        return rec
+
+def _get_file_bytes(file_id, mime_orig, title=None, files_resource=None):
+    """Download Drive file, converting format if necessary.
+
+    Args:
+        file_id (str): Drive file id.
+        title (str): Drive file title.
+        mime_orig (str): Mime type of Drive file.
+    Returns:
+        fh (io.BytesIO): file stream
+        filename: file and extension of output file
+        mime_out: output mime type
+    """
+    if not files_resource:
+        files_resource = get_files_service().files()
+    if title is None:
+        title = file_id
+    if mime_orig in MIME_MAP:
+        mime_out, extension = MIME_MAP[mime_orig]
+        request = files_resource.export_media(fileId=file_id, mimeType=mime_out)
+        filename = ''.join([title, extension])
+    else:  # direct download
+        request = files_resource.get_media(fileId=file_id)
+        filename = title
+        mime_out = mime_orig
+
+    fh = io.BytesIO()
+    downloader = MediaIoBaseDownload(fh, request)
+    done = False
+    while done is False:
+        status, done = downloader.next_chunk()
+        # print("Download %d%%." % int(status.progress() * 100))
+    _logger.debug('Downloaded {}'.format(title))
+    return fh, filename, mime_out
+
+
+def _get_doc_html_body_string(file_id):
+    fh, _, _ = _get_file_bytes(file_id, mime_orig=GDOC_MIMETYPE)
+    content = fh.getvalue().decode()
+    body = BeautifulSoup(content, features="lxml").body
+    content = '\n'.join([str(i) for i in body.contents])
+    return content
+
+
+def _get_txt_file_as_string(file_id):
+    fh, _, _ = _get_file_bytes(file_id, mime_orig=TXT_MIMETYPE)
+    content = fh.getvalue().decode().strip()
+    return content
