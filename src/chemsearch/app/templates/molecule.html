@@ -15,16 +15,21 @@
     <tr><th>Category</th>
         <td><a href="{{ url_for('main.index', category=mol.category) }}">{{ mol.category }}</a></td></tr>
     <tr><th>InChIKey</th>
-        <td>{{ mol.inchi_key }}</td></tr>
+        <td><span id="val_inchikey">{{ mol.inchi_key }}</span><button id="btn_inchikey" class="copy-btn">
+            {#<i class="far fa-copy"></i>#}
+            <span class="glyphicon glyphicon-copy" data-toggle="tooltip" data-placement="top" title="Copy"></span>
+        </button></td></tr>
     <tr><th>Smiles</th>
-        <td>{{ mol.smiles }}</td></tr>
+        <td><span id="val_smiles">{{ mol.smiles }}</span>
+            <button id="btn_smiles" class="copy-btn">
+            <span class="glyphicon glyphicon-copy" data-toggle="tooltip" data-placement="top" title="Copy"></span></button></td></tr>
     {%- if config['USE_DRIVE'] %}
     <tr><th>Directory</th>
         <td><a href="{{ mol.dir_url }}" target="_blank">{{ mol.dir_url }}</a></td></tr>
     <tr><th>User</th>
         <td><a href="{{ url_for('main.index', user=mol.user) }}">{{ mol.user }}</a></td></tr>
     {% endif %}
-        <tr><th>Modified</th>
+    <tr><th>Modified</th>
         <td>{{ moment(mol.mod_time).calendar() }}</td></tr>
     <tr><th>XRefs</th>
         <td>
@@ -35,5 +40,42 @@
         </td></tr>
     </tbody>
 </table>
+
+{% endblock %}
+
+
+{% block scripts %}
+{{ super() }}
+
+<script>
+$(function () {
+    $('[data-toggle="tooltip"]').tooltip()
+})
+
+const get_copy_fn = target_selector => {
+    return function(event){
+        const target = document.querySelector(target_selector);
+        const range = document.createRange();
+        range.selectNode(target);
+        window.getSelection().addRange(range);
+        try {
+          const successful = document.execCommand('copy');
+          const msg = successful ? 'successful' : 'unsuccessful';
+          console.log('Copy email command was ' + msg);
+        } catch(err) {
+          console.log('Oops, unable to copy');
+        }
+        window.getSelection().removeAllRanges();
+      }
+}
+
+const btn_inchikey = document.querySelector('#btn_inchikey');
+btn_inchikey.addEventListener('click', get_copy_fn('#val_inchikey'))
+
+const btn_smiles = document.querySelector('#btn_smiles');
+btn_smiles.addEventListener('click', get_copy_fn('#val_smiles'))
+
+
+</script>
 
 {% endblock %}
