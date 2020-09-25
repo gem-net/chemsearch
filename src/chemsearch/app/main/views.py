@@ -103,7 +103,7 @@ def results():
         sims = get_page_items_or_404(sims_all, page_no)
     else:
         abort(404, "Unrecognized search type.")
-    filterable = filters.count_filterable(molecules)
+    filterable = filters.count_filterable(molecules_all)
     return render_template('results.html', smiles=smiles,
                            molecules=molecules, sims=sims,
                            search_type=search_type, n_pages=n_pages,
