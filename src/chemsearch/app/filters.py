@@ -13,13 +13,20 @@ def get_filters_from_args(args):
     return filter_dict
 
 
-def filter_mols(mols, args):
+def sort_and_filter_mols(mols, args):
+    sort_by = args.get('sort', 'newest')
+    if sort_by == 'newest':
+        pass  # sorted by default
+    elif sort_by == 'oldest':
+        mols = sorted(mols, key=lambda m: m.mod_time, reverse=False)
+    elif sort_by == 'alphabetical':
+        mols = sorted(mols, key=lambda m: m.mol_name, reverse=False)
+    else:
+        pass  # ignore unrecognized sorting key
     filter_dict = get_filters_from_args(args)
-    if not filter_dict:
-        return mols, filter_dict
     for attr, val in filter_dict.items():
         mols = [i for i in mols if getattr(i, attr) == val]
-    return mols, filter_dict
+    return mols, filter_dict, sort_by
 
 
 def count_filterable(mols):

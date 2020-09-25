@@ -25,13 +25,16 @@ _logger = logging.getLogger(__name__)
 @main.route('/', methods=['GET', 'POST'])
 def index():
     if not current_app.config['USE_AUTH'] or not current_user.is_anonymous and current_user.in_team:
-        pass_mols, filter_dict = filters.filter_mols(LOCAL_MOLECULES, request.args)
+        pass_mols, filter_dict, sort_by = filters.sort_and_filter_mols(
+            LOCAL_MOLECULES, request.args)
         filterable = filters.count_filterable(pass_mols)
         page_no = request.args.get('page', 1, type=int)
         molecules = get_page_items_or_404(pass_mols, page_no)
         n_pages = get_page_count(len(pass_mols))
         return render_template('index.html', molecules=molecules, n_pages=n_pages,
-                               filters=filter_dict, filterable=filterable)
+                               filters=filter_dict, filterable=filterable,
+                               sort_by=sort_by,
+                               )
     else:
         return render_template('index.html')
 
@@ -72,7 +75,7 @@ def results():
         smiles: str
         search_type: in ('similarity', 'substructure')
     """
-    pass_mols, filter_dict = filters.filter_mols(LOCAL_MOLECULES, request.args)
+    pass_mols, filter_dict, sort_by = filters.sort_and_filter_mols(LOCAL_MOLECULES, request.args)
     smiles = request.args.get('smiles')
     search_type = request.args.get('search_type')
     if smiles in (None, '') or search_type in (None, ''):
@@ -104,7 +107,9 @@ def results():
     return render_template('results.html', smiles=smiles,
                            molecules=molecules, sims=sims,
                            search_type=search_type, n_pages=n_pages,
-                           filters=filter_dict, filterable=filterable)
+                           filters=filter_dict, filterable=filterable,
+                           sort_by=sort_by,
+                           )
 
 
 @main.route('/admin', methods=['GET', 'POST'])

@@ -26,6 +26,7 @@ def load_molecules(load_rdkit_mol=True):
     try:
         df = pd.read_csv(REFERENCE_PATH, sep='\t', parse_dates=['mod_time'],
                          infer_datetime_format=True)
+        df.sort_values(['mod_time'], inplace=True, ascending=False)
     except pd.errors.EmptyDataError:
         return
     # categories = sorted(list(df.category.unique()))

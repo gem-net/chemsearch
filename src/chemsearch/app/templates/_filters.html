@@ -13,3 +13,17 @@
     {% endfor %}{# end of attr_value loop #}
 </div>
 {% endfor %}
+
+<div>
+    Sort by:
+    <span class="text-muted">
+    {% for val in ['newest', 'oldest', 'alphabetical'] %}
+        {% if sort_by != val %}
+        <a href="{{ url_for(request.endpoint, **get_updated_args('sort', val)) }}">{{ val }}</a>
+        {% else %}
+        {{ val }}
+        {% endif %}
+        {% if not loop.last %} | {% endif %}
+    {% endfor %}{# end of sort_by loop #}
+    </span>
+</div>
