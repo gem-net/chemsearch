@@ -260,6 +260,7 @@ def get_file_listing_and_custom_info(mol, files_resource=None):
         content (html, None): content of custom file, in html.
     """
     df = scan_folder(mol.folder_id, files_resource=files_resource)
+    df.sort_values('modifiedTime', ascending=False)
     if type(df) is not pd.DataFrame:
         _logger.info("Folder lookup failed for %s.", mol)
         return None, None, None

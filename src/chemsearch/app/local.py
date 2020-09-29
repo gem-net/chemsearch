@@ -65,6 +65,8 @@ def _get_mtime(path):
 def _get_listing_for_local_dir(dir_path):
     dir_path = pathlib.Path(dir_path)
     _, subdirs, filenames = next(os.walk(dir_path))
+    skip_files = frozenset(['.DS_Store', ])
+    filenames = [i for i in filenames if i not in skip_files]
     types_names = list(product(['folder'], subdirs)) + list(product(['file'], filenames))
     records = []
     for kind, name in types_names:
@@ -77,6 +79,7 @@ def _get_listing_for_local_dir(dir_path):
         })
         records.append(record)
     df = pd.DataFrame(data=records) if records else None
+    df.sort_values('modifiedTime', ascending=False, inplace=True)
     return df
 
 
