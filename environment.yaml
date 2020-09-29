@@ -27,6 +27,8 @@ dependencies:
   - rauth
   - Flask-Moment
   - beautifulsoup4
+  - markdown
+  - bleach
   - pip:
     - gspread
     - pyscaffold

@@ -106,6 +106,10 @@ class LocalMolecule(Molecule):
         mol_path = os.path.join(mol_dir, self.mol_filename)
         return mol_path
 
+    @property
+    def local_mol_dir(self):
+        return os.path.join(paths.ARCHIVE_DIR, self.category, self.mol_name)
+
     @staticmethod
     def _get_mol_path_from_record(record=None):
         """Get mol path from Drive table record."""
