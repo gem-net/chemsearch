@@ -302,6 +302,7 @@ def _get_custom_file_record_if_exists(df):
         rec = df[txt_match].iloc[0]
         return rec
 
+
 def _get_file_bytes(file_id, mime_orig, title=None, files_resource=None):
     """Download Drive file, converting format if necessary.
 

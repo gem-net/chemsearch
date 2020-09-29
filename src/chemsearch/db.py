@@ -5,8 +5,8 @@ import pandas as pd
 from rdkit.Chem import MolFromSmiles
 from rdkit.DataStructs import TanimotoSimilarity
 
+from . import paths
 from .molecule import LocalMolecule, Molecule
-from .admin import REFERENCE_PATH
 
 
 class MolException(Exception):
@@ -19,12 +19,12 @@ _logger = logging.getLogger(__name__)
 def load_molecules(load_rdkit_mol=True):
     # drive_path = os.path.join(LOCAL_DB_PATH, 'gdrive.tsv')
     # gd = pd.read_csv(drive_path, sep='\t')
-    if not os.path.exists(REFERENCE_PATH):
-        _logger.warning(f"Reference path not found: {REFERENCE_PATH}.")
+    if not os.path.exists(paths.REFERENCE_PATH):
+        _logger.warning(f"Reference path not found: {paths.REFERENCE_PATH}.")
         return
-    _logger.info(f"Attempting to load molecule info from {REFERENCE_PATH}.")
+    _logger.info(f"Attempting to load molecule info from {paths.REFERENCE_PATH}.")
     try:
-        df = pd.read_csv(REFERENCE_PATH, sep='\t', parse_dates=['mod_time'],
+        df = pd.read_csv(paths.REFERENCE_PATH, sep='\t', parse_dates=['mod_time'],
                          infer_datetime_format=True)
         df.sort_values(['mod_time'], inplace=True, ascending=False)
     except pd.errors.EmptyDataError:

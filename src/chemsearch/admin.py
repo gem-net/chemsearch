@@ -20,38 +20,24 @@ from .molecule import LocalMolecule
 from .plot import save_svg_if_not_present
 from . import drive
 
+from . import paths
+
 _logger = logging.getLogger(__name__)
-
-
-ARCHIVE_DIR = os.environ.get('LOCAL_DB_PATH')
-SCAN_RESULTS_PATH = os.path.join(ARCHIVE_DIR, 'scan_local.tsv')
-REFERENCE_PATH = os.path.join(ARCHIVE_DIR, 'master_local.tsv')
-
-
-def update_paths(use_drive=False):
-    global ARCHIVE_DIR, SCAN_RESULTS_PATH, REFERENCE_PATH
-    ARCHIVE_DIR = os.environ.get('LOCAL_DB_PATH')
-    if use_drive:
-        SCAN_RESULTS_PATH = os.path.join(ARCHIVE_DIR, 'scan_gdrive.tsv')
-        REFERENCE_PATH = os.path.join(ARCHIVE_DIR, 'master_gdrive.tsv')
-    else:
-        SCAN_RESULTS_PATH = os.path.join(ARCHIVE_DIR, 'scan_local.tsv')
-        REFERENCE_PATH = os.path.join(ARCHIVE_DIR, 'master_local.tsv')
 
 
 def run_full_scan_and_rebuild_from_drive_no_app():
     meta = drive.Meta().build()
     reload_env()
-    drive.create_local_archive(meta.molfiles, local_root=ARCHIVE_DIR,
+    drive.create_local_archive(meta.molfiles, local_root=paths.ARCHIVE_DIR,
                                files_resource=meta.files_resource,
-                               scan_path=SCAN_RESULTS_PATH)
-    df = assemble_archive_metadata(ARCHIVE_DIR)
+                               scan_path=paths.SCAN_RESULTS_PATH)
+    df = assemble_archive_metadata(paths.ARCHIVE_DIR)
     return df
 
 
 def scan_local_archive():
     """Builds local.tsv for local MOL files, equiv of gdrive.tsv Drive info."""
-    root = pathlib.Path(ARCHIVE_DIR)
+    root = pathlib.Path(paths.ARCHIVE_DIR)
     records = []
     root_dir, test_categs, _ = next(os.walk(root, topdown=True))
     for test_categ in test_categs:
@@ -88,7 +74,7 @@ def scan_local_archive():
         df = pd.DataFrame(
             columns=['id', 'name', 'modifiedTime', 'lastModifyingUser', 'category',
                      'folder_id', 'folder_name', 'folder_modified', 'folder_user'])
-    df.to_csv(SCAN_RESULTS_PATH, sep='\t', index=False)
+    df.to_csv(paths.SCAN_RESULTS_PATH, sep='\t', index=False)
     return df
 
 
@@ -97,8 +83,8 @@ def assemble_archive_metadata(archive_dir=None, use_drive=False):
 
     Export summary table (summary.tsv) to archive directory root.
     """
-    update_paths(use_drive=use_drive)
-    mols = pd.read_csv(SCAN_RESULTS_PATH, sep='\t',
+    paths.update_paths(use_drive=use_drive)
+    mols = pd.read_csv(paths.SCAN_RESULTS_PATH, sep='\t',
                        parse_dates=['modifiedTime', 'folder_modified'],
                        infer_datetime_format=True)
     mol_info = []
@@ -115,9 +101,9 @@ def assemble_archive_metadata(archive_dir=None, use_drive=False):
             info[field] = getattr(m, field)
         mol_info.append(info)
     summary = pd.DataFrame.from_records(mol_info)
-    summary.to_csv(REFERENCE_PATH, sep='\t', index=False)
+    summary.to_csv(paths.REFERENCE_PATH, sep='\t', index=False)
     _logger.info(f"Reference images written to molecule directories.")
-    _logger.info(f"Molecule identifiers and fingerprints written to {REFERENCE_PATH}.")
+    _logger.info(f"Molecule identifiers and fingerprints written to {paths.REFERENCE_PATH}.")
     return summary
 
 

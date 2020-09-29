@@ -8,6 +8,8 @@ import pandas as pd
 from rdkit import Chem
 from rdkit.Chem import AllChem
 
+from . import paths
+
 
 class Molecule:
     """Basic molecule stats object."""
@@ -100,16 +102,15 @@ class LocalMolecule(Molecule):
         return svg_url
 
     def _get_mol_path(self):
-        archive_dir = os.environ.get('LOCAL_DB_PATH', 'local_db')
-        mol_dir = os.path.join(archive_dir, self.category, self.mol_name)
+        mol_dir = os.path.join(paths.ARCHIVE_DIR, self.category, self.mol_name)
         mol_path = os.path.join(mol_dir, self.mol_filename)
         return mol_path
 
     @staticmethod
     def _get_mol_path_from_record(record=None):
         """Get mol path from Drive table record."""
-        archive_dir = os.environ.get('LOCAL_DB_PATH', 'local_db')
-        mol_dir = os.path.join(archive_dir, record.category, record.folder_name)
+        mol_dir = os.path.join(paths.ARCHIVE_DIR, record.category,
+                               record.folder_name)
         mol_path = os.path.join(mol_dir, record['name'])
         return mol_path
 
