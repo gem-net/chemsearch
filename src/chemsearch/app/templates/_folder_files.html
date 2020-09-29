@@ -7,15 +7,27 @@
             <thead><tr>
                 <th>File</th>
                 <th>Modified</th>
-                <th>Modified by</th>
+                {% if config['USE_DRIVE'] %}<th>Modified by</th>{% endif %}
             </tr></thead>
             <tbody>
             {% for ind, row in df.iterrows() %}
             <tr>
+                {% if config['USE_DRIVE'] %}
                 <td><a href="{{ row.loc['webViewLink'] }}" target="_blank">
                     <span class="mr-1"><img class="mt-1" src="{{ row.loc['iconLink'] }}" alt="icon"></span>
-                    {{ row['name'] }}</a></td>
+                    {{ row['name'] }}</a>
+                </td>
                 <td>{{ row['lastModifyingUser'] }}</td>
+                {% else %}{# local files #}
+                <td>
+                    {% if row['kind'] == 'folder' %}
+                        <span class="mr-1 glyphicon glyphicon-folder-open"></span>
+                    {% else %}
+                        <span class="mr-1 glyphicon glyphicon-file"></span>
+                    {% endif %}
+                    {{ row['name'] }}
+                </td>
+                {% endif %}
                 <td>{{ moment(row['modifiedTime']).calendar() }}</td>
             </tr>
             {% endfor %}

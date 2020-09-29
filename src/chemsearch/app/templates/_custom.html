@@ -9,10 +9,15 @@
       {{ content | safe }}
   </div>
   <div class="panel-footer small">
+      {% if config['USE_DRIVE'] %}
       <span>From <a href="{{ rec.loc['webViewLink'] }}" target="_blank">
             <span><img src="{{ rec.loc['iconLink'] }}" alt="icon"></span>
             {{ rec['name'] }}</a> (Modified by {{ rec['lastModifyingUser'] }}
             {{ moment(rec['modifiedTime']).fromNow()}}.)</span>
+      {% else %}
+      <span>From <span class="glyphicon glyphicon-file"></span>
+            {{ rec['name'] }} (Modified {{ moment(rec['modifiedTime']).fromNow()}}.)</span>
+      {% endif %}
   </div>
 </div>
 {% endif %}
