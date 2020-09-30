@@ -42,16 +42,23 @@ def get_file_listing_and_custom_info(mol):
 
 def clean_html(html):
     allowed_tags = ['a', 'abbr', 'acronym', 'b', 'blockquote', 'code',
-                    'em', 'i', 'li', 'ol', 'strong', 'ul',
-                    'pre', 'h1', 'h2', 'h3', 'p']
-    html_clean = bleach.linkify(bleach.clean(html, tags=allowed_tags))
+                    'em', 'i', 'li', 'ol', 'strong', 'ul', 'img',
+                    'pre', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'hr',
+                    'table', 'thead', 'tr', 'th', 'tbody', 'td']
+    allowed_attrs = {'ol': ['start']}
+    html_clean = bleach.linkify(bleach.clean(html, tags=allowed_tags,
+                                             attributes=allowed_attrs))
+    html_clean = html_clean.replace(
+        '<table>', '<table class="table table-responsive table-hover">')
     return html_clean
 
 
 def _get_clean_html_from_md_file(md_path):
     md_bytes = io.BytesIO()
-    markdown.markdownFromFile(input=str(md_path), output_format='html5',
-                              output=md_bytes, tab_length=2)
+    markdown.markdownFromFile(input=str(md_path), output_format='html',
+                              output=md_bytes, tab_length=4,
+                              extensions=['sane_lists', 'tables']
+                              )
     html = md_bytes.getvalue().decode('utf8')
     html_clean = clean_html(html)
     return html_clean
