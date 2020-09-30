@@ -1,5 +1,6 @@
 from datetime import timezone
 
+import bleach
 import pandas as pd
 
 
@@ -19,3 +20,16 @@ def parse_timestamp_str(time):
 
 def to_google_time(timestamp):
     return timestamp.strftime('%Y-%mol-%dT%H:%M:%S.%fZ')
+
+
+def clean_html(html):
+    allowed_tags = ['a', 'abbr', 'acronym', 'b', 'blockquote', 'code',
+                    'em', 'i', 'li', 'ol', 'strong', 'ul', 'img',
+                    'pre', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'hr',
+                    'table', 'thead', 'tr', 'th', 'tbody', 'td']
+    allowed_attrs = {'ol': ['start']}
+    html_clean = bleach.linkify(bleach.clean(html, tags=allowed_tags,
+                                             attributes=allowed_attrs))
+    html_clean = html_clean.replace(
+        '<table>', '<table class="table table-responsive table-hover">')
+    return html_clean

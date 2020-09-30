@@ -6,9 +6,10 @@ import datetime
 from collections import OrderedDict
 from itertools import product
 
-import bleach
 import markdown
 import pandas as pd
+
+from ..helpers import clean_html
 
 _logger = logging.getLogger(__name__)
 
@@ -38,19 +39,6 @@ def get_file_listing_and_custom_info(mol):
             content = infile.read()
         content = f"<pre>{content}</pre>"
     return df, rec, content
-
-
-def clean_html(html):
-    allowed_tags = ['a', 'abbr', 'acronym', 'b', 'blockquote', 'code',
-                    'em', 'i', 'li', 'ol', 'strong', 'ul', 'img',
-                    'pre', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'hr',
-                    'table', 'thead', 'tr', 'th', 'tbody', 'td']
-    allowed_attrs = {'ol': ['start']}
-    html_clean = bleach.linkify(bleach.clean(html, tags=allowed_tags,
-                                             attributes=allowed_attrs))
-    html_clean = html_clean.replace(
-        '<table>', '<table class="table table-responsive table-hover">')
-    return html_clean
 
 
 def _get_clean_html_from_md_file(md_path):

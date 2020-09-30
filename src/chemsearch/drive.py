@@ -4,18 +4,20 @@ import os
 import time
 import logging
 
+import markdown
 import pandas as pd
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload, HttpError
 from bs4 import BeautifulSoup
 
-from .helpers import parse_timestamp_str
+from .helpers import parse_timestamp_str, clean_html
 
 
 _logger = logging.getLogger(__name__)
 GDOC_MIMETYPE = 'application/vnd.google-apps.document'
 TXT_MIMETYPE = 'text/plain'
+MD_MIMETYPE = 'text/markdown'
 
 MIME_MAP = {
     GDOC_MIMETYPE: ('text/html', '.html'),  # ('application/pdf', '.pdf'),  # Google Docs
@@ -280,6 +282,11 @@ def _get_custom_record_and_content_from_folder_df(df):
     try:
         if mimetype == GDOC_MIMETYPE:
             content = _get_doc_html_body_string(file_id)
+        elif mimetype == MD_MIMETYPE:
+            raw_str = _get_txt_file_as_string(file_id, mime_orig=MD_MIMETYPE)
+            html = markdown.markdown(raw_str,
+                                     extensions=['sane_lists', 'tables'])
+            content = clean_html(html)
         elif mimetype == TXT_MIMETYPE:
             content = _get_txt_file_as_string(file_id)
             content = f"<pre>{content}</pre>"
@@ -290,18 +297,22 @@ def _get_custom_record_and_content_from_folder_df(df):
 
 
 def _get_custom_file_record_if_exists(df):
+    """Priority: custom.gdoc, custom markdown, custom text"""
     is_gdoc = df['mimeType'] == GDOC_MIMETYPE
-    name_is_custom = df['name'].apply(lambda v: os.path.splitext(v)[0].lower() == 'custom')
-
-    gdoc_match = is_gdoc & name_is_custom
-    if gdoc_match.sum() == 1:
-        rec = df[gdoc_match].iloc[0]
-        return rec
+    is_md = df['mimeType'] == MD_MIMETYPE
     is_txt = df['mimeType'] == TXT_MIMETYPE
-    txt_match = is_txt & name_is_custom
-    if txt_match.sum() == 1:
-        rec = df[txt_match].iloc[0]
-        return rec
+    name_is_custom = df['name'].apply(
+        lambda v: os.path.splitext(v)[0].lower() == 'custom')
+
+    tests = [
+        is_gdoc & name_is_custom,
+        is_md & name_is_custom,
+        is_txt & name_is_custom,
+    ]
+    for test in tests:
+        if test.sum() == 1:
+            rec = df[test].iloc[0]
+            return rec
 
 
 def _get_file_bytes(file_id, mime_orig, title=None, files_resource=None):
@@ -347,7 +358,8 @@ def _get_doc_html_body_string(file_id):
     return content
 
 
-def _get_txt_file_as_string(file_id):
-    fh, _, _ = _get_file_bytes(file_id, mime_orig=TXT_MIMETYPE)
+def _get_txt_file_as_string(file_id, mime_orig=None):
+    mime_orig = TXT_MIMETYPE if mime_orig is None else mime_orig
+    fh, _, _ = _get_file_bytes(file_id, mime_orig=mime_orig)
     content = fh.getvalue().decode().strip()
     return content
