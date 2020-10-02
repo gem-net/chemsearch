@@ -2,7 +2,7 @@ import os
 import logging
 
 import pandas as pd
-from rdkit.Chem import MolFromSmiles
+from rdkit.Chem import MolFromSmiles, MolFromSmarts
 from rdkit.DataStructs import TanimotoSimilarity
 
 from . import paths
@@ -47,9 +47,9 @@ def get_single_molecule():
     return mol
 
 
-def get_substructure_matches(smiles, mols=None):
-    """Get LocalMolecule matches with smiles as substructure"""
-    query = MolFromSmiles(smiles)
+def get_substructure_matches(query_str, mols=None, is_smarts=False):
+    """Get LocalMolecule matches with SMILES or SMARTS query as substructure"""
+    query = MolFromSmarts(query_str) if is_smarts else MolFromSmiles(query_str)
     if query is None:
         raise MolException("Error building molecule from input.")
     mols = LOCAL_MOLECULES if mols is None else mols

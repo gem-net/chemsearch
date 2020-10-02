@@ -14,7 +14,7 @@
 </div>
 
 <div id="intro">
-    <p class="mb-0">Search the database by drawing a structure.</p>
+    <p class="mb-0">Search the database by drawing a structure or by entering a SMILES or SMARTS query.</p>
 </div>
 
 <div id="draw-section" class="urow">
@@ -24,23 +24,38 @@
     <div id="search-form-div" class="ucol-md-3 ucol-md-offset-1">
     <form id="search-form" action="{{ url_for('main.results') }}">
     {#        <button class="btn btn-large btn-info" onclick="dumpMolecules()">Dump!</button>#}
-        <div class="smiles-div">
-            <label for='smiles-input'><span id="helpBlock" class="help-block">Draw molecule or enter SMILES below.</span></label>
-            <textarea id='smiles-input' class="form-control" name="smiles" aria-describedby="helpBlock"
-                                                        placeholder="SMILES"></textarea>
+        <div class="form-group smiles-div">
+            <label for='txt-input'><span id="helpBlock" class="help-block">Draw molecule or enter SMILES/SMARTS below.</span></label>
+            <textarea id='txt-input' class="form-control" name="query" aria-describedby="helpBlock"
+                                                        placeholder="SMILES or SMARTS"></textarea>
+            <div class="radio">
+              <label>
+                <input type="radio" name="query_type" id="type-smiles" value="smiles" checked>
+                SMILES
+              </label>
+            </div>
+            <div class="radio">
+              <label>
+                <input type="radio" name="query_type" id="type-smarts" value="smarts">
+                  SMARTS <span class="text-muted">(substructure only)</span>
+              </label>
+            </div>
+        </div>
 
-        </div>
-        <div class="radio">
-          <label>
-            <input type="radio" name="search_type" id="optionsRadios1" value="similarity" checked>
-            Similarity search
-          </label>
-        </div>
-        <div class="radio disabled">
-          <label>
-            <input type="radio" name="search_type" id="optionsRadios2" value="substructure">
-            Substructure search
-          </label>
+        <div class="form-group">
+            <label for="optionsRadios1">Search type</label>
+            <div class="radio">
+              <label>
+                <input type="radio" name="search_type" id="similarity-radio" value="similarity" checked>
+                Similarity search
+              </label>
+            </div>
+            <div class="radio">
+              <label>
+                <input type="radio" name="search_type" id="substructure-radio" value="substructure">
+                Substructure search
+              </label>
+            </div>
         </div>
 
         <button type="submit" class="btn btn-primary" onclick="return copyMolecules()">Search</button>
@@ -58,16 +73,16 @@
   <script>
     var chemEditor;
     var chemComposer;
+    const radio_smiles = document.getElementById('type-smiles');
+    const radio_smarts = document.getElementById('type-smarts');
+    const radio_sub = document.getElementById('substructure-radio');
+    const radio_sim = document.getElementById('similarity-radio');
+
     function init()
     {
-        /*
-      var elem = document.getElementById('chemComposer');
-      var chemEditor = new Kekule.Editor.ChemSpaceEditor(document, null, Kekule.Render.RendererType.R2D);
-      chemComposer = new Kekule.Editor.Composer(elem, chemEditor);
-      */
       chemComposer = Kekule.Widget.getWidgetById('chemComposer');
-      {#chemComposer.setAutoResizeConstraints({width: 1, height: 1})#}
-      {#  .setEnableDimensionTransform(true).setAutoSetMinDimension(true);#}
+      radio_smarts.addEventListener('click', (event) => {radio_sub.checked = true;});
+      radio_sim.addEventListener('click', (event) => {radio_smiles.checked = true;});
     }
     Kekule.X.domReady(init);
 
@@ -78,35 +93,29 @@
 
     function copyMolecules()
     {
-        const smiles_input = document.getElementById('smiles-input')
-        let smiles_text = smiles_input.value;
+        const txt_input = document.getElementById('txt-input');
+        let txt_val = txt_input.value;
         let mols = getComposer().exportObjs(Kekule.Molecule);
         let n_mols = mols.length;
-        console.log('n_mols: ' + n_mols);
-        console.log('smiles_text: ' + smiles_text);
-
-
-      if (n_mols !== 1 && smiles_text.length === 0){
+      if (n_mols !== 1 && txt_val.length === 0){
           alert("Please provide one molecule.");
           return false;
       }
       else {
           if (n_mols > 0) {
-
-              if (smiles_text.length !== 0){
-                  console.log('NO!')
+              if (txt_val.length !== 0){
                   alert("Please either drawing or SMILES, not both.");
                   return false;
               }
               let mol = mols[0];
               const smiles = Kekule.IO.saveFormatData(mol, 'smi');
               console.log(smiles)
-              smiles_input.textContent = smiles;
+              txt_input.textContent = smiles;
+              radio_smiles.checked = true;
           }
           return true;
       }
     }
-
   </script>
 
 {% endblock %}

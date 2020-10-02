@@ -73,29 +73,36 @@ def search():
 def results():
     """
     Request args:
-        smiles: str
+        query: str
+        query_type: ('smiles' (DEFAULT), 'smarts')
         search_type: in ('similarity', 'substructure')
     """
     pass_mols, filter_dict, sort_by = filters.sort_and_filter_mols(LOCAL_MOLECULES, request.args)
-    smiles = request.args.get('smiles')
+    query = request.args.get('query')
+    query_type = request.args.get('query_type', 'smiles')
+    is_smiles = query_type in ('smiles', '')
     search_type = request.args.get('search_type')
-    if smiles in (None, '') or search_type in (None, ''):
+    if query in (None, '') or search_type in (None, ''):
         flash("Bad inputs", "error")
         return redirect(url_for('.search'))
     page_no = request.args.get('page', 1, type=int)
+    molecules, molecules_all, sims, n_pages = None, None, None, None
     if search_type == 'substructure':
         try:
-            molecules_all = get_substructure_matches(smiles, mols=pass_mols)
+            molecules_all = get_substructure_matches(query, mols=pass_mols,
+                                                     is_smarts=~is_smiles)
         except MolException as e:
             flash(str(e), "error")
             return redirect(url_for('.search'))
         n_pages = get_page_count(len(molecules_all))
         molecules = get_page_items_or_404(molecules_all, page_no) \
             if molecules_all else []
-        sims = None  # no similarity scores for this search type
     elif search_type == 'similarity':
+        if query_type is 'smarts':
+            flash(str(e), "error")
+            return redirect(url_for('.search'))
         try:
-            sims_all, molecules_all = get_sim_matches(smiles, mols=pass_mols)
+            sims_all, molecules_all = get_sim_matches(query, mols=pass_mols)
         except MolException as e:
             flash(str(e), "error")
             return redirect(url_for('.search'))
@@ -105,11 +112,11 @@ def results():
     else:
         abort(404, "Unrecognized search type.")
     filterable = filters.count_filterable(molecules_all)
-    return render_template('results.html', smiles=smiles,
+    return render_template('results.html', query=query,
                            molecules=molecules, sims=sims,
                            search_type=search_type, n_pages=n_pages,
                            filters=filter_dict, filterable=filterable,
-                           sort_by=sort_by,
+                           sort_by=sort_by, query_type=query_type,
                            )
 
 
