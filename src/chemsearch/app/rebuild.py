@@ -28,8 +28,7 @@ def run_full_scan_and_rebuild(user=None, run_async=True):
 
 
 def run_full_scan_and_rebuild_async(app, build_id: str):
-    from .. import _logger, drive
-    from .. import admin
+    from .. import _logger, drive, paths, admin
     from ..db import reload_molecules
     with app.app_context():
         archive_dir = current_app.config['LOCAL_DB_PATH']
@@ -46,7 +45,7 @@ def run_full_scan_and_rebuild_async(app, build_id: str):
             build.set_status_and_commit("Updating local archive.")
             drive.create_local_archive(meta.molfiles, local_root=archive_dir,
                                        files_resource=meta.files_resource,
-                                       scan_path=admin.SCAN_RESULTS_PATH)
+                                       scan_path=paths.SCAN_RESULTS_PATH)
         else:
             build.set_status_and_commit(
                 "Identifying categories and MOL files in local archive.")
