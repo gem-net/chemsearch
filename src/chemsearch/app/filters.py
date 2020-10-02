@@ -1,4 +1,4 @@
-from collections import Counter
+from collections import Counter, OrderedDict
 
 
 ALLOWED_FILTERS = tuple()  # set by set_filters_using_config
@@ -30,10 +30,11 @@ def sort_and_filter_mols(mols, args):
 
 
 def count_filterable(mols):
-    counts = dict()
+    counts = OrderedDict()
     for attr in ALLOWED_FILTERS:
         attr_counts = Counter([getattr(mol, attr) for mol in mols])
-        counts[attr] = attr_counts
+        sorted_keys = sorted(list(attr_counts))
+        counts[attr] = OrderedDict({i: attr_counts[i] for i in sorted_keys})
     return counts
 
 
