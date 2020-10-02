@@ -4,6 +4,7 @@ creds.json
 local_db
 db.sqlite
 wiki
+custom_queries.yaml
 # Temporary and binary files
 *~
 *.py[cod]

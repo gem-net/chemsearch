@@ -61,9 +61,19 @@
         <button type="submit" class="btn btn-primary" onclick="return copyMolecules()">Search</button>
     </form>
     </div>
-
 </div>
 
+{% set shortcuts = config['CUSTOM_QUERIES'] %}
+{% if shortcuts %}
+<h2>Substructure search shortcuts</h2>
+
+{% for shortcut_name, query in shortcuts.items()  %}
+    <a class="button btn btn-default" href="{{
+            url_for('main.results', query=query, query_type='smarts',
+                    search_type='substructure') }}">{{ shortcut_name }}</a>
+
+{% endfor %}
+{% endif %}
 
 {% endblock %}
 

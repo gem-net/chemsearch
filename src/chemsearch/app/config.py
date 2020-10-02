@@ -1,16 +1,29 @@
 import os
 import logging
 import pathlib
+import yaml
+
+from collections import OrderedDict
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 _logger = logging.getLogger(__name__)
+PACKAGE_ROOT = pathlib.Path(__file__).parent.parent.parent.parent
 
 
 def get_demo_dir_path():
-    package_root = pathlib.Path(__file__).parent.parent.parent.parent
-    demo_dir = str(package_root.joinpath('demo_db'))
+    demo_dir = str(PACKAGE_ROOT.joinpath('demo_db'))
     return demo_dir
 
+
+def load_custom_queries():
+    default_path = PACKAGE_ROOT.joinpath('custom_queries.yaml')
+    yaml_path = os.environ.get('CUSTOM_QUERIES_YAML', default_path)
+    if yaml_path.exists():
+        with open(yaml_path, 'r') as infile:
+            query_dict = OrderedDict(yaml.load(infile, Loader=yaml.SafeLoader))
+    else:
+        query_dict = None
+    return query_dict
 
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'hard to guess string'
@@ -55,6 +68,8 @@ class Config:
     LOCAL_DB_PATH = os.environ.get('LOCAL_DB_PATH', get_demo_dir_path())
     os.environ.update({'LOCAL_DB_PATH': LOCAL_DB_PATH})
     _logger.info(f"Using {LOCAL_DB_PATH=}")
+
+    CUSTOM_QUERIES = load_custom_queries()
 
     @staticmethod
     def init_app(app):
