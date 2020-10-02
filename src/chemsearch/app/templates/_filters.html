@@ -1,7 +1,10 @@
 
-{% for attr, counts in filterable.items() %}
-<div>
-    <strong>{{ attr }}</strong>
+{% if filterable %}
+<table id="filter-table"><tbody>
+    {% for attr, counts in filterable.items() %}
+    <tr>
+    <th>{{ attr }}</th>
+    <td>
     {% for val, n in counts.items() %}
         {% if (attr, val) in filters.items() %}
             {% set btn_class = "btn-info" %}
@@ -11,11 +14,14 @@
         <a class="button btn {{ btn_class }}"
           href="{{ url_for(request.endpoint, **get_updated_args(attr, val)) }}">{{ val }} ({{ n }})</a>
     {% endfor %}{# end of attr_value loop #}
-</div>
+    </td>
+    </tr>
 {% endfor %}
+</tbody></table>
+{% endif %}
 
 {% if search_type != 'similarity' %}
-<div>
+<div id="sorting-options">
     Sort by:
     <span class="text-muted">
     {% for val in ['newest', 'oldest', 'alphabetical'] %}
