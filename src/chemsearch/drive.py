@@ -268,7 +268,7 @@ def get_file_listing_and_custom_info(mol, files_resource=None):
         return None, None, None
     rec, content = _get_custom_record_and_content_from_folder_df(df)
     if rec is None:
-        _logger.info("No custom file found.")
+        _logger.debug("No custom file found.")
         return df, None, None
     return df, rec, content
 
