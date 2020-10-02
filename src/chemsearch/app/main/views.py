@@ -98,8 +98,8 @@ def results():
         molecules = get_page_items_or_404(molecules_all, page_no) \
             if molecules_all else []
     elif search_type == 'similarity':
-        if query_type is 'smarts':
-            flash(str(e), "error")
+        if query_type == 'smarts':
+            flash("Use SMILES rather than SMARTS for similarity search.", "error")
             return redirect(url_for('.search'))
         try:
             sims_all, molecules_all = get_sim_matches(query, mols=pass_mols)
