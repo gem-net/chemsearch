@@ -8,6 +8,7 @@ from googleapiclient.discovery import build
 
 from . import login_manager
 from .models import User
+from ..paths import SERVICE_ACCOUNT_CREDS
 
 logger = logging.getLogger(__name__)
 MEMBERS_DICT = {}  # updated at startup with update_members_dict_from_config
@@ -33,7 +34,7 @@ def _set_service_handle_using_config(app):
         'https://www.googleapis.com/auth/admin.directory.group.member.readonly',
         ]
     credentials = service_account.Credentials.from_service_account_file(
-        service_account_file, scopes=scopes)
+        SERVICE_ACCOUNT_CREDS, scopes=scopes)
     delegated_credentials = credentials.with_subject(
         app.config['CREDENTIALS_AS_USER'])
     DIR_SERVICE_HANDLE = build('admin', 'directory_v1',

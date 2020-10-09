@@ -174,6 +174,5 @@ def demo_gather_metadata_stage_dir(archive_dir=None):
 
 
 def reload_env():
-    env_path = os.getenv('ENV_NAME', find_dotenv(usecwd=True))
-    _logger.info("Loading .env from %s", env_path)
-    load_dotenv(env_path, override=True, verbose=True)
+    _logger.info("Loading .env from %s", paths.ENV_PATH)
+    load_dotenv(paths.ENV_PATH, override=True, verbose=True)

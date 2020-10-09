@@ -6,6 +6,7 @@ or
 import os
 import sys
 import logging
+import pathlib
 
 # LOGGING
 LOG_LEVEL = getattr(logging, os.environ.get('LOG_LEVEL', 'INFO').upper())
@@ -14,9 +15,10 @@ logging.basicConfig(format='%(levelname)s: %(message)s',  # %(asctime)-15s
 _logger = logging.getLogger(__name__)
 
 # ENSURE DOTENV VARIABLES HAVE LOADED (for gunicorn)
-if not os.getenv('FLASK_CONFIG', ''):
-    from dotenv import load_dotenv, find_dotenv
-    load_dotenv(find_dotenv())
+from dotenv import load_dotenv
+_env_path = str(pathlib.Path(__file__).parent.parent.parent
+                .joinpath('config').joinpath('.env').absolute())
+load_dotenv(_env_path, verbose=True)
 
 from .app import create_app
 

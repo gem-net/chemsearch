@@ -12,7 +12,7 @@ from googleapiclient.http import MediaIoBaseDownload, HttpError
 from bs4 import BeautifulSoup
 
 from .helpers import parse_timestamp_str, clean_html
-
+from .paths import SERVICE_ACCOUNT_CREDS
 
 _logger = logging.getLogger(__name__)
 GDOC_MIMETYPE = 'application/vnd.google-apps.document'
@@ -225,7 +225,9 @@ def run_query(query, page_size=1000, as_df=True, file_fields=None,
 
 def get_files_service():
     """Get dictionary of {service_name: service_handle}."""
-    service_account_file = os.getenv('SERVICE_ACCOUNT_FILE')
+    service_account_file = SERVICE_ACCOUNT_CREDS
+    if not os.path.exists(service_account_file):
+        raise FileNotFoundError(f"Need credentials at {service_account_file}")
     scopes = ['https://www.googleapis.com/auth/drive.readonly',
               'https://www.googleapis.com/auth/drive.metadata.readonly']
 

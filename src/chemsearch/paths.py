@@ -1,8 +1,13 @@
 import os
+import pathlib
 
 ARCHIVE_DIR = os.environ.get('LOCAL_DB_PATH')
+CONFIG_DIR = str(pathlib.Path(__file__).parent.parent.parent\
+                 .joinpath('config').absolute())
+ENV_PATH = os.path.join(CONFIG_DIR, '.env')
 SCAN_RESULTS_PATH = os.path.join(ARCHIVE_DIR, 'scan_local.tsv')
 REFERENCE_PATH = os.path.join(ARCHIVE_DIR, 'master_local.tsv')
+SERVICE_ACCOUNT_CREDS = os.path.join(CONFIG_DIR, 'creds.json')
 
 
 def update_paths(use_drive=False):

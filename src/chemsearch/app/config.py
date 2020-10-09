@@ -25,6 +25,7 @@ def load_custom_queries():
         query_dict = None
     return query_dict
 
+
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'hard to guess string'
     APP_TITLE = os.environ.get('APP_TITLE', 'Molecules')
