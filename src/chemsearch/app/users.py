@@ -6,7 +6,7 @@ from flask import g, current_app
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 
-from . import login_manager
+from . import login_manager, db
 from .models import User
 from ..paths import SERVICE_ACCOUNT_CREDS
 
@@ -19,7 +19,14 @@ DIR_SERVICE_HANDLE = None  # set at app startup
 def load_user(user_id):
     if not current_app.config['USE_AUTH']:
         return None
-    return User.query.get(int(user_id))
+    user = User.query.get(int(user_id))
+    if user and current_app.config['CREDENTIALS_AS_USER'] == user.email:
+        if not user.is_anonymous and not user.is_admin:
+            user.is_admin = True
+            db.session.add(user)
+            db.session.commit()
+            logger.info(f"Granted admin status for {user.email}.")
+    return user
 
 
 def _set_service_handle_using_config(app):
@@ -28,7 +35,6 @@ def _set_service_handle_using_config(app):
     if not app.config['USE_DRIVE'] and not app.config['USE_AUTH']:
         app.logger.info("Skipping DIR service creation (Drive/Auth only).")
         return
-    service_account_file = app.config['SERVICE_ACCOUNT_FILE']
     scopes = [
         'https://www.googleapis.com/auth/admin.directory.user.readonly',
         'https://www.googleapis.com/auth/admin.directory.group.member.readonly',
