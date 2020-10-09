@@ -36,7 +36,7 @@ def admin_form_from_users(current_user: User, other_users: List[User]):
         default = "checked" if is_admin else None
         field = BooleanField(label=user.email, default=default)
         setattr(CustomAdminForm, field_name, field)
-        CustomAdminForm.submit = SubmitField(label='Update')
+    CustomAdminForm.submit = SubmitField(label='Update')
 
     form = CustomAdminForm()
     return form
