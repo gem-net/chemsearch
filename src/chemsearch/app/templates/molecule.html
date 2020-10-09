@@ -41,6 +41,7 @@
         <td>
             <a href="{{ url_for('main.results', search_type='similarity', smiles=mol.smiles) }}" class="btn btn-sm btn-default" target="_blank">Find similar</a>
             <a href="{{ url_for('main.results', search_type='substructure', smiles=mol.smiles) }}" class="btn btn-sm btn-default" target="_blank">Find superstructure</a></td></tr>
+    {% if  g.db_templates %}
     <tr><th>XRefs</th>
         <td>
         {% for db_name in g.db_templates %}
@@ -48,6 +49,7 @@
                 <a href="{{ db_url }}" class="btn btn-sm btn-default" target="_blank">{{ db_name }}</a>
         {% endfor %}
         </td></tr>
+    {% endif %}
     </tbody>
 </table>
 </div>
