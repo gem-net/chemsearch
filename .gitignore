@@ -2,7 +2,7 @@
 .env.*
 creds.json
 local_db
-db.sqlite
+*.sqlite
 wiki
 custom_queries.yaml
 # Temporary and binary files
