@@ -54,6 +54,8 @@ def create_app(config_name):
     with app.app_context():
         db.create_all()
 
+    link_data(app)
+
     @app.before_request
     def before_request():
         from .users import MEMBERS_DICT
@@ -66,10 +68,6 @@ def create_app(config_name):
                 # first-request data reload might be necessary for auto-restart development
                 current_user.in_team = current_user.social_id in g.members_dict
                 db.session.commit()
-
-    @app.before_first_request
-    def before_first_request():
-        link_data(app)
 
     @app.context_processor
     def utility_processor():
@@ -87,9 +85,8 @@ def link_data(app):
     local_db_path = os.path.abspath(app.config['LOCAL_DB_PATH'])
     static_path = app.static_folder
     data_path = pathlib.Path(static_path).joinpath('data')
-
     symlink_needed = False
-    if os.path.exists(data_path):
+    if data_path.is_symlink():
         current_target = os.readlink(data_path)
         if current_target != local_db_path:
             app.logger.info(f"Updating static/data target.")
@@ -98,8 +95,12 @@ def link_data(app):
         else:
             app.logger.info(f"Current static/data target is correct.")
     else:
-        symlink_needed = True
         app.logger.info("Creating static/data link.")
+        symlink_needed = True
     if symlink_needed:
-        data_path.symlink_to(local_db_path, target_is_directory=True)
-        app.logger.info(f"New data directory is {local_db_path}.")
+        try:
+            data_path.symlink_to(local_db_path, target_is_directory=True)
+            app.logger.info(f"New data directory is {local_db_path}.")
+        except FileExistsError:  # handle race condition
+            app.logger.info(f"Skipping overwrite of existing data dir.")
+            pass
