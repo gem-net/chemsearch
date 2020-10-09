@@ -9,13 +9,10 @@ dependencies:
   - flask
   - flask-wtf
   - rdkit
-  - jupyter
-  - jupyterlab
   - pandas
   - oauth2client
   - openbabel
   - python-dotenv
-  - jupyter_contrib_nbextensions
   - google-api-python-client
   - google-auth
   - google-auth-httplib2
@@ -29,10 +26,16 @@ dependencies:
   - beautifulsoup4
   - markdown
   - bleach
+  - pyyaml
   - pip:
     - gspread
     - pyscaffold
-    - Flask-Session
     - flask-shell-ipython
     - flask-migrate
     - more-itertools
+# NON-ESSENTIAL
+#  - jupyter
+#  - jupyterlab
+#  - jupyter_contrib_nbextensions
+#  - pip:
+#    - Flask-Session
