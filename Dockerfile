@@ -16,6 +16,8 @@ COPY src ./src
 COPY ./demo_db ./demo_db
 COPY ./config/external_dbs.yaml ./config/external_dbs.yaml
 
+RUN ["python", "-m", "src.chemsearch.prelaunch"]
+
 ENTRYPOINT ["gunicorn", "--worker-tmp-dir", "/dev/shm", "--log-file=-", \
             "src.chemsearch.chemsearch:app", "--workers=2", "--threads=4", \
             "--worker-class=gthread"]
