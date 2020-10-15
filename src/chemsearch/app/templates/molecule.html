@@ -39,8 +39,8 @@
         <td>{{ moment(mol.mod_time).calendar() }}</td></tr>
     <tr><th>Search</th>
         <td>
-            <a href="{{ url_for('main.results', search_type='similarity', smiles=mol.smiles) }}" class="btn btn-sm btn-default" target="_blank">Find similar</a>
-            <a href="{{ url_for('main.results', search_type='substructure', smiles=mol.smiles) }}" class="btn btn-sm btn-default" target="_blank">Find superstructure</a></td></tr>
+            <a href="{{ url_for('main.results', search_type='similarity', query=mol.smiles) }}" class="btn btn-sm btn-default" target="_blank">Find similar</a>
+            <a href="{{ url_for('main.results', search_type='substructure', query=mol.smiles) }}" class="btn btn-sm btn-default" target="_blank">Find superstructure</a></td></tr>
     {% if  g.db_templates %}
     <tr><th>XRefs</th>
         <td>
