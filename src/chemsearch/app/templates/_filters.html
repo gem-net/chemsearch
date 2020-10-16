@@ -1,4 +1,4 @@
-
+{% if molecules %}
 {% if filterable %}
 <table id="filter-table"><tbody>
     {% for attr, counts in filterable.items() %}
@@ -34,4 +34,5 @@
     {% endfor %}{# end of sort_by loop #}
     </span>
 </div>
+{% endif %}
 {% endif %}
