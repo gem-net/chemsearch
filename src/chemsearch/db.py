@@ -37,10 +37,12 @@ def load_molecules(load_rdkit_mol=True):
 
 def reload_molecules():
     global LOCAL_MOLECULES, MOLECULE_DICT
+    new_molecules = list(load_molecules(load_rdkit_mol=True))
+    new_id_dict = {i.inchi_key: i for i in LOCAL_MOLECULES}
     LOCAL_MOLECULES.clear()
-    LOCAL_MOLECULES.extend(load_molecules(load_rdkit_mol=True))
+    LOCAL_MOLECULES.extend(new_molecules)
     MOLECULE_DICT.clear()
-    MOLECULE_DICT.update({i.inchi_key: i for i in LOCAL_MOLECULES})
+    MOLECULE_DICT.update(new_id_dict)
 
 
 def get_single_molecule():
