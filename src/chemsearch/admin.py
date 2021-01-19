@@ -94,7 +94,7 @@ def assemble_archive_metadata(archive_dir=None, use_drive=False):
         _logger.info(f"Processing directory: {mol_dir}")
         m = LocalMolecule(mol, from_summary=False)
         if m.is_valid:
-            save_svg_if_not_present(m.mol, mol_dir)
+            save_svg_if_not_present(m.mol, m.svg_path)
         else:
             _logger.warning(f"Invalid MOL for {m.mol_name}.")
         for field in m.fields_all:

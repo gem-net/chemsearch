@@ -37,15 +37,9 @@ def plot_mol(mol):
     return fig, ax
 
 
-def save_svg_if_not_present(mol, out_dir):
-    """Save SVG images."""
-    # png_path = os.path.join(out_dir, 'ref_image.png')
-    svg_path = os.path.join(out_dir, 'ref_image.svg')
+def save_svg_if_not_present(mol, svg_path):
     if os.path.exists(svg_path):
         return
-    # if not os.path.exists(png_path) and not os.path.exists(svg_path):
-    # save_mol_as_svg(mol, svg_path)
     hf, ax = plot_mol(mol)
     hf.savefig(svg_path, bbox_inches='tight')
-    # hf.savefig(png_path, bbox_inches='tight')
     plt.close(hf)

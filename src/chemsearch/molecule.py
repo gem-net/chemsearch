@@ -97,18 +97,26 @@ class LocalMolecule(Molecule):
     def url_svg(self):
         data_dir = url_for('static', filename='data')
         local_dir = '/'.join([data_dir, self.category, self.mol_name])
-        svg_path = '/'.join([local_dir, 'ref_image.svg'])
+        svg_path = '/'.join([local_dir, self._get_svg_basename()])
         svg_url = urljoin(data_dir, svg_path)
         return svg_url
 
     def _get_mol_path(self):
-        mol_dir = os.path.join(paths.ARCHIVE_DIR, self.category, self.mol_name)
+        mol_dir = self.local_mol_dir
         mol_path = os.path.join(mol_dir, self.mol_filename)
         return mol_path
 
     @property
     def local_mol_dir(self):
         return os.path.join(paths.ARCHIVE_DIR, self.category, self.mol_name)
+
+    def _get_svg_basename(self):
+        return f'ref_{self.inchi_key}.svg'
+
+    @property
+    def svg_path(self):
+        svg_basename = self._get_svg_basename()
+        return os.path.join(self.local_mol_dir, svg_basename)
 
     @staticmethod
     def _get_mol_path_from_record(record=None):
