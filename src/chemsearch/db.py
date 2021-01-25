@@ -24,9 +24,7 @@ def load_molecules(load_rdkit_mol=True):
         return
     _logger.info(f"Attempting to load molecule info from {paths.REFERENCE_PATH}.")
     try:
-        df = pd.read_csv(paths.REFERENCE_PATH, sep='\t', parse_dates=['mod_time'],
-                         infer_datetime_format=True)
-        df.sort_values(['mod_time'], inplace=True, ascending=False)
+        df = _load_reference_file_as_df()
     except pd.errors.EmptyDataError:
         return
     # categories = sorted(list(df.category.unique()))
@@ -45,10 +43,11 @@ def reload_molecules():
     MOLECULE_DICT.update(new_id_dict)
 
 
-def get_single_molecule():
-    gen = load_molecules()
-    mol = next(gen)
-    return mol
+def _load_reference_file_as_df():
+    df = pd.read_csv(paths.REFERENCE_PATH, sep='\t', parse_dates=['mod_time'],
+                     infer_datetime_format=True)
+    df.sort_values(['mod_time'], inplace=True, ascending=False)
+    return df
 
 
 def get_substructure_matches(query_str, mols=None, is_smarts=False):
