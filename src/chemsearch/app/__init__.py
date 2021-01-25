@@ -43,6 +43,10 @@ def create_app(config_name):
 
     from .main import main as main_blueprint
     app.register_blueprint(main_blueprint)
+
+    from . import rebuild
+    from .models import ReferenceHash
+    rebuild.CURRENT_REF_HASH = ReferenceHash.get_latest_hash_from_db(app)
     # update_members_dict(app)
 
     # SET CONFIG_DEPENDENT MODULE ATTRIBUTES
@@ -68,6 +72,14 @@ def create_app(config_name):
                 # first-request data reload might be necessary for auto-restart development
                 current_user.in_team = current_user.social_id in g.members_dict
                 db.session.commit()
+        latest_hash = ReferenceHash.get_latest_hash_from_db(app)
+        if rebuild.CURRENT_REF_HASH != latest_hash:
+            app.logger.info("Identified updated reference hash "
+                            f"({latest_hash} > {rebuild.CURRENT_REF_HASH}). "
+                            "Reloading molecules.")
+            from ..db import reload_molecules
+            reload_molecules()
+            rebuild.CURRENT_REF_HASH = latest_hash
 
     @app.context_processor
     def utility_processor():

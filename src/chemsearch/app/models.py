@@ -1,8 +1,11 @@
 from time import time
 from datetime import datetime
+from flask import current_app
 from flask_login import UserMixin
 
 from . import db
+from .. import paths
+from ..admin import _get_md5
 
 
 class User(UserMixin, db.Model):
@@ -65,10 +68,42 @@ class Rebuild(db.Model):
         db.session.commit()
 
 
-# class Status(db.Model):
-#     __tablename__ = 'status'
-#     last_mol_modtime = db.Column(db.DateTime, index=True,
-#                                  default=datetime.fromtimestamp(0))
-#     last_refresh_time = db.Column(db.DateTime, index=True,
-#                                   default=datetime.fromtimestamp(0))
+class ReferenceHash(db.Model):
+    __tablename__ = 'reference_hash'
+    is_gdrive = db.Column(db.Boolean, primary_key=True)
+    hash = db.Column(db.String(255))
 
+    @staticmethod
+    def add_hash(use_drive=False, md5=None):
+        version_str = 'gdrive' if use_drive else 'local'
+        current_app.logger.debug(f'Setting {version_str} reference hash.')
+        rh = ReferenceHash.query.get(use_drive)
+        if rh is None:
+            rh = ReferenceHash(is_gdrive=use_drive)
+        rh.hash = md5
+        db.session.add(rh)
+        db.session.commit()
+
+    @staticmethod
+    def get_latest_hash_from_db(app):
+        with app.app_context():
+            use_drive = app.config['USE_DRIVE']
+            rh = ReferenceHash.query.get(use_drive)
+        md5 = rh.hash if rh is not None else None
+        return md5
+
+    # @staticmethod
+    # def calculate_hash():
+    #     md5 = _get_md5(paths.REFERENCE_PATH)
+    #     return md5
+
+    @staticmethod
+    def update_and_get_hash():
+        md5 = _get_md5(paths.REFERENCE_PATH)
+        use_drive = current_app.config['USE_DRIVE']
+        ReferenceHash.add_hash(use_drive=use_drive, md5=md5)
+        return md5
+
+    def __repr__(self):
+        version = 'gdrive' if self.is_gdrive else 'local'
+        return f'<ReferenceHash {version}>'

@@ -5,7 +5,10 @@ from threading import Thread
 from flask import current_app
 
 from . import db
-from .models import Rebuild
+from .models import Rebuild, ReferenceHash
+
+
+CURRENT_REF_HASH = None
 
 
 def run_full_scan_and_rebuild(user=None, run_async=True):
@@ -28,8 +31,9 @@ def run_full_scan_and_rebuild(user=None, run_async=True):
 
 
 def run_full_scan_and_rebuild_async(app, build_id: str):
+    global CURRENT_REF_HASH
     from .. import _logger, drive, paths, admin
-    from ..db import reload_molecules
+    # from ..db import reload_molecules
     with app.app_context():
         archive_dir = current_app.config['LOCAL_DB_PATH']
         log_path = os.path.join(archive_dir, f'rebuild_{build_id}.log')
@@ -56,7 +60,12 @@ def run_full_scan_and_rebuild_async(app, build_id: str):
         build.set_status_and_commit(f"Completed rebuild contains {len(df)} molecules.")
         build.mark_complete_and_commit()
 
-        reload_molecules()
+        new_hash = ReferenceHash.update_and_get_hash()
+        if new_hash != CURRENT_REF_HASH:
+            _logger.info(f"Reference file changed with build {build.id}: "
+                         f"{CURRENT_REF_HASH} ->  {new_hash}")
+        else:
+            _logger.info(f"No change to reference file from build {build.id}.")
         _logger.removeHandler(fh)
 
 
