@@ -10,7 +10,7 @@ import pathlib
 
 # LOGGING
 LOG_LEVEL = getattr(logging, os.environ.get('LOG_LEVEL', 'INFO').upper())
-logging.basicConfig(format='%(levelname)s: %(message)s',  # %(asctime)-15s
+logging.basicConfig(format='%(asctime)s <pid%(process)d %(threadName)s> %(levelname)s: %(message)s',
                     level=LOG_LEVEL, stream=sys.stdout)
 _logger = logging.getLogger(__name__)
 
