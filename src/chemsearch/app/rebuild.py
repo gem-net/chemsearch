@@ -7,6 +7,8 @@ from flask import current_app
 from . import db
 from .models import Rebuild, ReferenceHash
 
+from ..db import load_molecules, DuplicateTracker
+
 
 CURRENT_REF_HASH = None
 
@@ -66,6 +68,7 @@ def run_full_scan_and_rebuild_async(app, build_id: str):
                          f"{CURRENT_REF_HASH} ->  {new_hash}")
         else:
             _logger.info(f"No change to reference file from build {build.id}.")
+        DuplicateTracker(load_molecules(load_rdkit_mol=False))
         _logger.removeHandler(fh)
 
 
