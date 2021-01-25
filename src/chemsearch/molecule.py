@@ -1,6 +1,7 @@
 """Classes for molecules (user input version and local extended info)."""
 import os
 # import base64
+import logging
 from urllib.parse import urljoin
 
 from flask import url_for
@@ -9,6 +10,9 @@ from rdkit import Chem
 from rdkit.Chem import AllChem
 
 from . import paths
+
+
+_logger = logging.getLogger(__name__)
 
 
 class Molecule:
@@ -42,7 +46,6 @@ class Molecule:
             self.inchi_key = None
             self.fingerprint_similarity_raw = None
 
-
     @classmethod
     def get_morgan_fingerprint(cls, mol):
         return Chem.AllChem.GetMorganFingerprint(mol, 2)
@@ -72,7 +75,7 @@ class LocalMolecule(Molecule):
                 self.__setattr__(field, record[field])
             self.mol_path = self._get_mol_path()
             if store_mol:
-                self.mol = Chem.MolFromMolFile(self.mol_path)
+                self.mol = LocalMolecule._load_structure_from_mol(self.mol_path)
                 if self.mol is not None:
                     self.fingerprint_similarity_raw = Molecule.get_morgan_fingerprint(self.mol)
                     self.mol.SetProp("_Name", self.mol_name)
@@ -81,9 +84,9 @@ class LocalMolecule(Molecule):
             return
         # otherwise record is from SCAN_RESULTS
         self.mol_path = self._get_mol_path_from_scan_record(record)
-        m = Chem.MolFromMolFile(self.mol_path)
+        m = LocalMolecule._load_structure_from_mol(self.mol_path)
         super().__init__(m)
-        self.mol_id = record['id']  # MOL file ID in
+        self.mol_id = record['id']
         self.mol_name = record['folder_name']
         self.mol_filename = record['name']
         self.folder_id = record['folder_id']
@@ -128,5 +131,16 @@ class LocalMolecule(Molecule):
         mol_path = os.path.join(mol_dir, record['name'])
         return mol_path
 
+    @staticmethod
+    def _load_structure_from_mol(mol_path):
+        if not os.path.exists(mol_path):
+            raise MolFileNotFoundError(f"{mol_path} not found.")
+        mol = Chem.MolFromMolFile(mol_path)
+        return mol
+
     def __repr__(self):
         return f"<Molecule {self.mol_id}>"
+
+
+class MolFileNotFoundError(Exception):
+    pass
