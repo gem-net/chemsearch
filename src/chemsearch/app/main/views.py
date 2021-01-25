@@ -13,7 +13,7 @@ from ..models import User
 from ..oauth import OAuthSignIn
 from ..paging import get_page_items_or_404, get_page_count
 from ...db import get_substructure_matches, get_sim_matches, MolException, \
-    LOCAL_MOLECULES, MOLECULE_DICT
+    LOCAL_MOLECULES, MOLECULE_DICT, DUPLICATE_TRACKER
 from ... import drive
 
 
@@ -41,6 +41,10 @@ def index():
 @membership_required
 def molecule(inchi_key):
     mol = MOLECULE_DICT.get(inchi_key)
+    if inchi_key in DUPLICATE_TRACKER.duplicated_inchi_keys:
+        dup_ids = DUPLICATE_TRACKER.inchi_key_to_ids[inchi_key]
+        names_str = ', '.join([f"<{i.category} - {i.mol_name}>" for i in dup_ids])
+        flash(f"DUPLICATES FOUND: {names_str}", 'warning')
     if mol is None:
         abort(404, 'Molecule not found.')
     return render_template('molecule.html', mol=mol)
