@@ -16,7 +16,7 @@ from ..drive import Meta
 
 
 bootstrap = Bootstrap()
-db = SQLAlchemy()
+db = SQLAlchemy(session_options={'expire_on_commit': False})
 login_manager = LoginManager()
 migrate = Migrate()
 moment = Moment()
