@@ -5,7 +5,7 @@ import yaml
 
 from collections import OrderedDict
 
-basedir = os.path.abspath(os.path.dirname(__file__))
+_basedir = os.path.abspath(os.path.dirname(__file__))
 _logger = logging.getLogger(__name__)
 PACKAGE_ROOT = pathlib.Path(__file__).parent.parent.parent.parent
 
@@ -41,7 +41,7 @@ class Config:
     MOLECULES_PER_PAGE = os.environ.get('MOLECULES_PER_PAGE', 15)
 
     SQLALCHEMY_DATABASE_URI = \
-        'sqlite:///' + os.path.join(basedir, 'db.sqlite')
+        'sqlite:///' + os.path.join(_basedir, 'db.sqlite')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     # SESSION_TYPE = 'filesystem'
     # SESSION_FILE_DIR = os.environ.get('SESSION_FILE_DIR', os.getcwd())
