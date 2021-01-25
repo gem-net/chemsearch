@@ -55,8 +55,8 @@ def create_app(config_name):
     from .users import update_members_dict_from_config
     update_members_dict_from_config(app)
 
-    with app.app_context():
-        db.create_all()
+    # with app.app_context():
+    #     db.create_all()
 
     link_data(app)
 
