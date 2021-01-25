@@ -102,7 +102,10 @@ def link_data(app):
         current_target = os.readlink(data_path)
         if current_target != local_db_path:
             app.logger.info(f"Updating static/data target: {current_target} -> {local_db_path}.")
-            os.remove(data_path)
+            try:
+                os.remove(data_path)
+            except FileNotFoundError:
+                pass  # handle multiprocess race condition
             symlink_needed = True
         else:
             app.logger.debug(f"Current static/data target is correct.")
@@ -113,5 +116,5 @@ def link_data(app):
         try:
             data_path.symlink_to(local_db_path, target_is_directory=True)
             app.logger.info(f"New data directory is {local_db_path}.")
-        except FileExistsError:  # handle race condition
+        except FileExistsError:  # handle multiprocess race condition
             app.logger.debug(f"Skipping overwrite of existing data dir.")
