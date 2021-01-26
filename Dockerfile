@@ -14,11 +14,11 @@ ENV PATH=/opt/conda/envs/chemsearch/bin:$PATH
 WORKDIR /app
 COPY src ./src
 COPY ./demo_db ./demo_db
+COPY /config/demo.app_only.env ./config/.env
 COPY ./config/external_dbs.yaml ./config/external_dbs.yaml
 
 RUN ["python", "-m", "src.chemsearch.prelaunch"]
 
 ENTRYPOINT ["gunicorn", "--worker-tmp-dir", "/dev/shm", "--log-file=-", \
-            "src.chemsearch.chemsearch:app", "--workers=2", "--threads=4", \
-            "--worker-class=gthread"]
-CMD ["--bind=0.0.0.0:5000"]
+            "src.chemsearch.chemsearch:app"]
+CMD ["--bind=0.0.0.0:5000", "-w 1", "-k gevent"]
