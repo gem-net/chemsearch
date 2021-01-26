@@ -27,6 +27,7 @@ dependencies:
   - markdown
   - bleach
   - pyyaml
+  - gevent
   - pip:
     - gspread
     - pyscaffold
