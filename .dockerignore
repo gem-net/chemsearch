@@ -1,2 +1,2 @@
 src/chemsearch/app/static/data
-src/chemsearch/app/db.sqlite
+src/chemsearch/app/*.sqlite

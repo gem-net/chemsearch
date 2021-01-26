@@ -1,5 +1,6 @@
 .env
 .env.*
+private_*
 creds.json
 local_db
 *.sqlite
