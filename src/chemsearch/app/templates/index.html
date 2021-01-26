@@ -36,7 +36,11 @@
 <div id="intro">
     {% if molecules|length == 0  and not filters %}{# empty archive #}
         <p class="mb-0">No molecules found in archive.</p>
-        <p class="mb-0">Try a rebuild on the <a href="{{ url_for('main.admin') }}">Admin</a> page.</p>
+        {% if current_user.is_admin %}
+            <p class="mb-0">Try a rebuild on the <a href="{{ url_for('main.admin') }}">Admin</a> page.</p>
+        {% else %}
+            <p class="mb-0">An admin user may need to run a rebuild.</p>
+        {% endif %}
     {% elif molecules|length == 0 %}{# empty subset #}
         <p class="mb-0">No matching molecules found.</p>
     {% elif config['USE_DRIVE'] %}
