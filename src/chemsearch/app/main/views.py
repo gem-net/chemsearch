@@ -2,8 +2,7 @@ import logging
 
 from flask import render_template, flash, redirect, url_for, request, g, \
     current_app, abort
-from flask_login import login_user, logout_user,\
-    current_user
+from flask_login import login_user, logout_user, current_user
 
 from . import main
 from .forms import admin_form_from_users, EmptyForm
@@ -31,8 +30,7 @@ def index():
         n_pages = get_page_count(len(pass_mols))
         return render_template('index.html', molecules=molecules, n_pages=n_pages,
                                filters=filter_dict, filterable=filterable,
-                               sort_by=sort_by,
-                               )
+                               sort_by=sort_by)
     else:
         return render_template('index.html')
 
@@ -144,8 +142,7 @@ def admin():
     return render_template('admin.html', user_form=form,
                            empty_form=empty_form,
                            last_rebuild=last_rebuild,
-                           in_progress_builds=in_progress_builds,
-                           )
+                           in_progress_builds=in_progress_builds,)
 
 
 @main.route('/clear-rebuilds', methods=['POST'])
