@@ -67,6 +67,21 @@ class Rebuild(db.Model):
         db.session.add(self)
         db.session.commit()
 
+    @classmethod
+    def get_rebuilds_in_progress(cls):
+        return cls.query.filter_by(complete=False) \
+            .order_by(Rebuild.start_time).all()
+
+    @classmethod
+    def get_most_recent_incomplete_rebuild(cls):
+        return cls.query.filter_by(complete=False)\
+            .order_by(Rebuild.start_time.desc()).first()
+
+    @classmethod
+    def get_most_recent_complete_rebuild(cls):
+        return cls.query.filter_by(complete=True) \
+            .order_by(Rebuild.end_time.desc()).first()
+
 
 class ReferenceHash(db.Model):
     __tablename__ = 'reference_hash'

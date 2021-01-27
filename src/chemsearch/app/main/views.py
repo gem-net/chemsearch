@@ -6,9 +6,9 @@ from flask_login import login_user, logout_user, current_user
 
 from . import main
 from .forms import admin_form_from_users, EmptyForm
-from .. import db, META, rebuild, filters, local
+from .. import db, META, filters, local
 from ..decorators import membership_required, admin_required
-from ..models import User
+from ..models import User, Rebuild
 from ..oauth import OAuthSignIn
 from ..paging import get_page_items_or_404, get_page_count
 from ...db import get_substructure_matches, get_sim_matches, MolException, \
@@ -136,8 +136,8 @@ def admin():
             return redirect(url_for('main.admin'))
     else:
         form = None
-    last_rebuild = rebuild.get_most_recent_complete_rebuild()
-    in_progress_builds = rebuild.get_rebuilds_in_progress()
+    last_rebuild = Rebuild.get_most_recent_complete_rebuild()
+    in_progress_builds = Rebuild.get_rebuilds_in_progress()
     empty_form = EmptyForm()
     return render_template('admin.html', user_form=form,
                            empty_form=empty_form,
@@ -148,7 +148,7 @@ def admin():
 @main.route('/clear-rebuilds', methods=['POST'])
 @admin_required
 def clear_rebuilds():
-    in_progress = rebuild.get_rebuilds_in_progress()
+    in_progress = Rebuild.get_rebuilds_in_progress()
     for r in in_progress:
         r.complete = None
         db.session.add(r)
