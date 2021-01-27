@@ -28,7 +28,7 @@ def load_custom_queries():
 
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'hard to guess string'
-    APP_TITLE = os.environ.get('APP_TITLE', 'Molecules')
+    APP_TITLE = os.environ.get('APP_TITLE', 'Chemsearch')
     USE_AUTH = os.environ.get('USE_AUTH', 'off').lower() not in {'off', 'false', '0'}
     if USE_AUTH:
         OAUTH_CREDENTIALS = {
