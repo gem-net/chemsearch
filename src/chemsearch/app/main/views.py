@@ -64,6 +64,19 @@ def custom_info(inchi_key):
     return {'listing': listing_html, 'custom': custom_html}
 
 
+@main.route('/build-status/', methods=['POST', 'GET'])
+@admin_required
+def build_status():
+    build = Rebuild.get_most_recent_incomplete_rebuild()
+    if build:
+        is_complete = False
+    else:
+        build = Rebuild.get_most_recent_complete_rebuild()
+        is_complete = True
+    message = build.get_progress_message() if build else ''
+    return {'status': message, 'is_complete': is_complete}
+
+
 @main.route('/search', methods=['GET', 'POST'])
 @membership_required
 def search():
@@ -168,7 +181,7 @@ def logout():
 def reload():
     from ..rebuild import run_full_scan_and_rebuild
     run_full_scan_and_rebuild(current_user)
-    return redirect(url_for('main.admin'))
+    return {'message': 'Rebuild in progress'}
 
 
 @main.route('/authorize/<provider>')

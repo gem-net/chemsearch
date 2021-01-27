@@ -15,27 +15,23 @@
     {%- if last_rebuild %}
         <p>Last rebuild completed {{ moment(last_rebuild.end_time).fromNow() }}.</p>
     {% endif -%}
-    {% if in_progress_builds %}
-        <div class="alert alert-success" role="alert">
-        <span id="rebuild-progress">{{ in_progress_builds[0].get_progress_message() }}</span>
-        </div>
-    {% endif %}
-      <form action="{{ url_for('main.reload') }}" method="post">
-        {% set btn_classes = ['btn', 'btn-default', 'btn-lg'] %}
-        {%- if in_progress_builds  %}{% do btn_classes.append(' disabled') %}{% endif %}
-        {{ empty_form.hidden_tag() }}
-        {{ empty_form.submit(
-          value='⟳ Rebuild DB'|safe,
-          class_=btn_classes|join(' ')) }}</form>
-    {%- if in_progress_builds  %}
-      <form action="{{ url_for('main.clear_rebuilds') }}" method="post">
+    {% set in_progress =  'true' if in_progress_builds else 'false' %}
+    <div id="status-div" class="alert alert-success" style="display: {{ 'block' if in_progress_builds else 'none' }};"
+         role="alert" data-in-progress={{ in_progress }}>
+    <span id="spinner"><img src="{{ url_for('static', filename='loading.gif') }}" alt="">&nbsp;</span>
+    <span id="rebuild-progress">{{ in_progress_builds[0].get_progress_message() if in_progress_builds else 'Submitting rebuild request.'}}</span>
+    </div>
+
+    <button id='reload-button' class="btn btn-default btn-lg
+        {{ 'disabled' if in_progress_builds else '' }}">
+        ⟳ Rebuild DB</button>
+
+      <form id='clear-div' action="{{ url_for('main.clear_rebuilds') }}" method="post"
+          style="display:{{ 'inline-block' if in_progress_builds else 'none' }};">
         {{ empty_form.hidden_tag() }}
         {{ empty_form.submit(value="Clear rebuilds", class_='btn btn-default') }}
-{#          <button type="button" id="clear-button" class="btn btn-default">#}
-{#            Clear rebuilds#}
-{#          </button>#}
       </form>
-    {% endif %}
+
   </div>
 </div>
 
@@ -75,3 +71,70 @@
 </div>
 
 {% endblock %}
+
+{% block scripts %}
+{{ super() }}
+
+<script>
+$(function () {
+    const spinner_id = '#spinner';
+    const status_msg_id = '#rebuild-progress';
+    const status_div_id = '#status-div';
+
+    const status_div = $(status_div_id);
+    let in_progress = status_div.data('in-progress');
+
+    status_timer = null;
+
+    if(in_progress){
+        status_div.data('in-progress', true);
+        status_div.show();  //removeClass('hidden');
+        load_status(status_msg_id, spinner_id);
+        status_timer = setInterval(load_status, 1000, status_msg_id,
+            spinner_id)
+    }
+    $('#reload-button').on('click', function(e) { //use on if jQuery 1.7+
+        {# e.preventDefault();  //prevent form from submitting #}
+        // do status auto-updating
+        $('#reload-button').addClass('disabled')
+        $('#clear-div').show()
+        status_div.data('in-progress', true);
+        console.log("Submitting rebuild request.");
+        $.post("{{ url_for('main.reload') }}").done(function(response) {
+            status_div.show();
+            status_timer = setInterval(load_status, 1000, status_msg_id, spinner_id);
+            }).fail(function() {
+            console.log("Reload initiation failed.")
+            })
+    });
+
+})
+
+function load_status(msgElem, spinnerElem) {
+    console.log('Loading status info.');
+    $.post('{{ url_for("main.build_status") }}', {
+    }).done(function(response) {
+        const is_complete = response['is_complete'];
+        console.log('is_complete: ' + is_complete)
+        const status = String(response['status']);
+        if (is_complete){
+            $(spinnerElem).hide();
+            $('#clear-div').hide()
+            console.log("Rebuild complete. Stopping timer")
+            clearInterval(status_timer);
+        }
+        $(msgElem).text(status);
+        console.log('STATUS: ' + status);
+    }).fail(function() {
+        $(spinnerElem).hide();
+        console.log("Listing + custom info lookup failed.");
+        $(msgElem).text("Error: Could not contact server.");
+        console.log('Stopping timer due to failure.');
+        clearInterval(status_timer);
+    });
+}
+
+</script>
+
+{% endblock %}
+
