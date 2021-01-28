@@ -1,8 +1,11 @@
 import logging
+from datetime import datetime
+from io import StringIO, BytesIO
 
 from flask import render_template, flash, redirect, url_for, request, g, \
-    current_app, abort
+    current_app, abort, send_file
 from flask_login import login_user, logout_user, current_user
+from rdkit.Chem.rdmolfiles import SDWriter
 
 from . import main
 from .forms import admin_form_from_users, EmptyForm
@@ -156,6 +159,26 @@ def admin():
                            empty_form=empty_form,
                            last_rebuild=last_rebuild,
                            in_progress_builds=in_progress_builds,)
+
+
+@main.route('/sdf', methods=['GET'])
+@admin_required
+def sdf():
+    mimetype = 'chemical/x-mdl-sdfile'
+    date_str = datetime.utcnow().strftime('%Y-%m-%d')
+    filename = f'export_{date_str}.sdf'
+    tmp_str = StringIO()
+    sd_writer = SDWriter(tmp_str)
+    for m in LOCAL_MOLECULES:
+        sd_writer.write(m.mol)
+    sd_writer.flush()
+    tmp_str.seek(0)
+    tmp_bytes = BytesIO()
+    tmp_bytes.write(tmp_str.getvalue().encode('utf-8'))
+    tmp_str.close()
+    tmp_bytes.seek(0)
+    return send_file(tmp_bytes, mimetype=mimetype, as_attachment=True,
+                     attachment_filename=filename, cache_timeout=-1)
 
 
 @main.route('/clear-rebuilds', methods=['POST'])
