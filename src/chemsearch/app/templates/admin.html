@@ -24,13 +24,20 @@
 
     <button id='reload-button' class="btn btn-default btn-lg
         {{ 'disabled' if in_progress_builds else '' }}">
-        ⟳ Rebuild DB</button>
+        <span class="glyphicon glyphicon-refresh"></span> Rebuild DB
+    </button>
 
-      <form id='clear-div' action="{{ url_for('main.clear_rebuilds') }}" method="post"
-          style="display:{{ 'inline-block' if in_progress_builds else 'none' }};">
-        {{ empty_form.hidden_tag() }}
-        {{ empty_form.submit(value="Clear rebuilds", class_='btn btn-default') }}
-      </form>
+    <form id='clear-div' action="{{ url_for('main.clear_rebuilds') }}" method="post"
+        style="display:{{ 'inline-block' if in_progress_builds else 'none' }};">
+      {{ empty_form.hidden_tag() }}
+      {{ empty_form.submit(value="Clear rebuilds", class_='btn btn-default') }}
+    </form>
+
+    {% if inc_valid %}
+    <a id='download-sdf' class="btn btn-default btn-lg" href="{{ url_for('main.sdf') }}" role="button">
+        <span class="glyphicon glyphicon-download"></span> Export SDF
+    </a>
+    {% endif %}
 
   </div>
 </div>
@@ -107,6 +114,10 @@ $(function () {
             console.log("Reload initiation failed.")
             })
     });
+
+    $('#download-sdf').on('click', function(e){
+        $(this).blur();
+    })
 
 })
 

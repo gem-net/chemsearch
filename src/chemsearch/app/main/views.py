@@ -155,9 +155,10 @@ def admin():
     last_rebuild = Rebuild.get_most_recent_complete_rebuild()
     in_progress_builds = Rebuild.get_rebuilds_in_progress()
     empty_form = EmptyForm()
+    inc_valid = valid_mols_present()
     return render_template('admin.html', user_form=form,
                            empty_form=empty_form,
-                           last_rebuild=last_rebuild,
+                           last_rebuild=last_rebuild, inc_valid=inc_valid,
                            in_progress_builds=in_progress_builds,)
 
 
