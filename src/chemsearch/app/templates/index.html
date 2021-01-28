@@ -36,7 +36,7 @@
 <div id="intro">
     {% if molecules|length == 0  and not filters %}{# empty archive #}
         <p class="mb-0">No molecules found in archive.</p>
-        {% if current_user.is_admin %}
+        {% if current_user.is_admin or not config['USE_AUTH'] %}
             <p class="mb-0">Try a rebuild on the <a href="{{ url_for('main.admin') }}">Admin</a> page.</p>
         {% else %}
             <p class="mb-0">An admin user may need to run a rebuild.</p>
