@@ -31,7 +31,8 @@
             <span class="glyphicon glyphicon-copy" data-toggle="tooltip" data-placement="top" title="Copy"></span></button></td></tr>
     {%- if config['USE_DRIVE'] %}
     <tr><th>Directory</th>
-        <td><a href="{{ mol.dir_url }}" target="_blank">{{ mol.dir_url }}</a></td></tr>
+        {% set dir_url = 'https://drive.google.com/drive/folders/' + mol.folder_id %}
+        <td><a href="{{ dir_url }}" target="_blank">{{ dir_url }}</a></td></tr>
     <tr><th>User</th>
         <td><a href="{{ url_for('main.index', user=mol.user) }}">{{ mol.user }}</a></td></tr>
     {% endif %}

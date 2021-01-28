@@ -63,7 +63,6 @@ class LocalMolecule(Molecule):
         'folder_id',
         'mod_time',
         'mol_basename',
-        'dir_url',
     )
 
     fields_all = tuple(list(fields_local) + list(Molecule.fields_stat))
@@ -94,7 +93,6 @@ class LocalMolecule(Molecule):
         self.user = record['lastModifyingUser']
         self.mod_time = record['modifiedTime']
         self.mol_basename = os.path.splitext(self.mol_filename)[0]
-        self.dir_url = f"https://drive.google.com/drive/u/0/folders/{self.folder_id}"
         if self.is_valid:
             self.mol.SetProp("_Name", self.mol_name)
 
