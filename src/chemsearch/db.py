@@ -78,6 +78,15 @@ def get_sim_matches(smiles, mols=None):
     return sims, molecules
 
 
+def valid_mols_present():
+    has_valid = False
+    for mol in LOCAL_MOLECULES:
+        if mol.is_valid:
+            has_valid = True
+            break
+    return has_valid
+
+
 class DuplicateTracker:
 
     MolId = namedtuple('MolId', ['lm_ind', 'category', 'mol_name'])

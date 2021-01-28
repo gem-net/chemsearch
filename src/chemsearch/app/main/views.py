@@ -15,7 +15,7 @@ from ..models import User, Rebuild
 from ..oauth import OAuthSignIn
 from ..paging import get_page_items_or_404, get_page_count
 from ...db import get_substructure_matches, get_sim_matches, MolException, \
-    LOCAL_MOLECULES, MOLECULE_DICT, DUPLICATE_TRACKER
+    LOCAL_MOLECULES, MOLECULE_DICT, DUPLICATE_TRACKER, valid_mols_present
 from ... import drive
 
 
@@ -164,13 +164,17 @@ def admin():
 @main.route('/sdf', methods=['GET'])
 @admin_required
 def sdf():
+    if not valid_mols_present():
+        flash("No valid MOL objects available for export.")
+        return redirect(url_for('main.admin'))
     mimetype = 'chemical/x-mdl-sdfile'
     date_str = datetime.utcnow().strftime('%Y-%m-%d')
     filename = f'export_{date_str}.sdf'
     tmp_str = StringIO()
     sd_writer = SDWriter(tmp_str)
     for m in LOCAL_MOLECULES:
-        sd_writer.write(m.mol)
+        if m.is_valid:
+            sd_writer.write(m.mol)
     sd_writer.flush()
     tmp_str.seek(0)
     tmp_bytes = BytesIO()
