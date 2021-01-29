@@ -39,24 +39,18 @@ def create_app(config_name):
     from ..paths import update_paths
     update_paths(use_drive=app.config['USE_DRIVE'])
 
-    # session.init_app(app)
-
     from .main import main as main_blueprint
     app.register_blueprint(main_blueprint)
 
     from . import rebuild
     from .models import ReferenceHash
     rebuild.CURRENT_REF_HASH = ReferenceHash.get_latest_hash_from_db(app)
-    # update_members_dict(app)
 
     # SET CONFIG_DEPENDENT MODULE ATTRIBUTES
     from .filters import set_filters_using_config
     set_filters_using_config(app)
     from .users import update_members_dict_from_config
     update_members_dict_from_config(app)
-
-    # with app.app_context():
-    #     db.create_all()
 
     link_data(app)
 

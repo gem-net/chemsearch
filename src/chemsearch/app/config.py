@@ -16,7 +16,7 @@ def get_demo_dir_path():
 
 
 def load_custom_queries():
-    default_path = PACKAGE_ROOT.joinpath('custom_queries.yaml')
+    default_path = PACKAGE_ROOT.joinpath('config', 'custom_queries.yaml')
     yaml_path = os.environ.get('CUSTOM_QUERIES_YAML', default_path)
     if yaml_path.exists():
         with open(yaml_path, 'r') as infile:
