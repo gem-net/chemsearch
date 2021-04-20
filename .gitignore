@@ -6,6 +6,8 @@ local_db
 *.sqlite
 wiki
 custom_queries.yaml
+/src/chemsearch/app/static/data
+/notebooks/
 # Temporary and binary files
 *~
 *.py[cod]
@@ -28,6 +30,7 @@ __pycache__/*
 .pydevproject
 .settings
 .idea
+.vscode
 tags
 
 # Package files
@@ -39,8 +42,9 @@ tags
 # Unittest and coverage
 htmlcov/*
 .coverage
+.coverage.*
 .tox
-junit.xml
+junit*.xml
 coverage.xml
 .pytest_cache/
 
@@ -56,5 +60,4 @@ MANIFEST
 
 # Per-project virtualenvs
 .venv*/
-/src/chemsearch/app/static/data
-/notebooks/
+.conda*/
