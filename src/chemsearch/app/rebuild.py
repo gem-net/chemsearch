@@ -7,7 +7,7 @@ from flask import current_app
 from . import db
 from .models import Rebuild, ReferenceHash
 
-from ..db import load_molecules, DuplicateTracker
+from ..db import iter_molecules, DuplicateTracker
 
 
 CURRENT_REF_HASH = None
@@ -34,14 +34,14 @@ def run_full_scan_and_rebuild(user=None, run_async=True):
 
 def run_full_scan_and_rebuild_async(app, build_id: str):
     global CURRENT_REF_HASH
-    from .. import _logger, drive, paths, admin
+    from .. import logger, drive, paths, admin
     # from ..db import reload_molecules
     with app.app_context():
         archive_dir = current_app.config['LOCAL_DB_PATH']
         log_path = os.path.join(archive_dir, f'rebuild_{build_id}.log')
         fh = logging.FileHandler(log_path)
         fh.setLevel(logging.DEBUG)
-        _logger.addHandler(fh)
+        logger.addHandler(fh)
 
         build = Rebuild.query.get(build_id)  # type: Rebuild
         if app.config['USE_DRIVE']:
@@ -64,12 +64,12 @@ def run_full_scan_and_rebuild_async(app, build_id: str):
 
         new_hash = ReferenceHash.update_and_get_hash()
         if new_hash != CURRENT_REF_HASH:
-            _logger.info(f"Reference file changed with build {build.id}: "
-                         f"{CURRENT_REF_HASH} ->  {new_hash}")
+            logger.info(f"Reference file changed with build {build.id}: "
+                        f"{CURRENT_REF_HASH} ->  {new_hash}")
         else:
-            _logger.info(f"No change to reference file from build {build.id}.")
-        DuplicateTracker(load_molecules(load_rdkit_mol=False))
-        _logger.removeHandler(fh)
+            logger.info(f"No change to reference file from build {build.id}.")
+        DuplicateTracker(iter_molecules(load_rdkit_mol=False))
+        logger.removeHandler(fh)
 
 
 def mark_rebuilds_as_failed(rebuild_list, commit=True):

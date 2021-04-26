@@ -3,6 +3,7 @@ import os
 import sys
 import logging
 import argparse
+from typing import Union
 from pkg_resources import get_distribution, DistributionNotFound
 
 
@@ -10,7 +11,26 @@ __author__ = "Stephen Gaffney"
 __copyright__ = "Stephen Gaffney"
 __license__ = "gpl3"
 
-_logger = logging.getLogger(__name__)
+
+def _create_logger(log_level: Union[str, None] = None):
+    if log_level is None:
+        log_level = os.environ.get('LOG_LEVEL', 'INFO').upper()
+    log_level_int = getattr(logging, log_level)
+
+    ch = logging.StreamHandler()
+    ch.setLevel(log_level_int)
+    formatter = logging.Formatter(
+        fmt='%(asctime)s - %(message)s',
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
+    ch.setFormatter(formatter)
+
+    _logger = logging.getLogger(__name__)
+    _logger.addHandler(ch)
+    return _logger
+
+
+logger = _create_logger()
 
 
 def main(args):
@@ -21,7 +41,6 @@ def main(args):
     """
     from . import admin, drive
     args = parse_args(args)
-    setup_logging(args.loglevel)
     local_archive_path = args.path
     admin.reload_env()
 
@@ -30,25 +49,14 @@ def main(args):
                                local_root=local_archive_path,
                                files_resource=meta.files_resource)
     summary_df = admin.assemble_archive_metadata(local_archive_path)
-    _logger.info(f"Info generated for {len(summary_df)} molecules.")
-    _logger.debug("Script complete.")
+    logger.info(f"Info generated for {len(summary_df)} molecules.")
+    logger.debug("Script complete.")
 
 
 def run():
     """Entry point for console_scripts
     """
     main(sys.argv[1:])
-
-
-def setup_logging(loglevel):
-    """Setup basic logging
-
-    Args:
-      loglevel (int): minimum loglevel for emitting messages
-    """
-    log_format = "[%(asctime)s] %(levelname)s:%(name)s:%(message)s"
-    logging.basicConfig(level=loglevel, stream=sys.stdout,
-                        format=log_format, datefmt="%Y-%mol-%d %H:%M:%S")
 
 
 def parse_args(args):

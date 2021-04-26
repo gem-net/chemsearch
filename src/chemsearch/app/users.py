@@ -102,7 +102,9 @@ def update_members_dict_from_config(app):
     if not app.config['USE_AUTH']:
         return
     if DIR_SERVICE_HANDLE is None:
+        app.logger.info("Acquiring directory service handle.")
         _set_service_handle_using_config(app)
+    app.logger.info("Updating members list.")
     new_dict = _get_members_dict(app)
     MEMBERS_DICT.clear()
     MEMBERS_DICT.update(new_dict)

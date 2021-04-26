@@ -68,7 +68,7 @@ class Config:
 
     LOCAL_DB_PATH = os.environ.get('LOCAL_DB_PATH', get_demo_dir_path())
     os.environ.update({'LOCAL_DB_PATH': LOCAL_DB_PATH})
-    _logger.info(f"Using {LOCAL_DB_PATH=}")
+    _logger.debug(f"Using {LOCAL_DB_PATH=}")
 
     CUSTOM_QUERIES = load_custom_queries()
 
