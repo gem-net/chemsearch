@@ -11,7 +11,7 @@ from .paths import ENV_PATH, update_paths
 from dotenv import load_dotenv
 load_dotenv(ENV_PATH, verbose=True)
 
-config_name = os.getenv('FLASK_CONFIG') or 'default'
+config_name = os.getenv('FLASK_ENV') or 'default'
 app = Flask(__name__)
 app.config.from_object(config[config_name])
 db.init_app(app)

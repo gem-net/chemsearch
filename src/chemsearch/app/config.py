@@ -85,7 +85,6 @@ class TestingConfig(Config):
 class ProductionConfig(Config):
     @classmethod
     def init_app(cls, app):
-        print("Running the production config init code.")
         Config.init_app(app)
 
         # email errors to the administrators
@@ -98,15 +97,16 @@ class ProductionConfig(Config):
             if getattr(cls, 'MAIL_USE_TLS', None):
                 secure = ()
         # print(f"{cls.MAIL_SERVER=}, {cls.MAIL_ADMIN=}, {cls.MAIL_SERVER}")
-        mail_handler = SMTPHandler(
-            mailhost=(cls.MAIL_SERVER, cls.MAIL_PORT),
-            fromaddr=cls.MAIL_SENDER,
-            toaddrs=[cls.MAIL_ADMIN],
-            subject=cls.MAIL_SUBJECT_PREFIX + ' Application Error',
-            credentials=credentials,
-            secure=secure)
-        mail_handler.setLevel(logging.ERROR)
-        app.logger.addHandler(mail_handler)
+        if cls.MAIL_ADMIN is not None and cls.MAIL_SENDER is not None:
+            mail_handler = SMTPHandler(
+                mailhost=(cls.MAIL_SERVER, cls.MAIL_PORT),
+                fromaddr=cls.MAIL_SENDER,
+                toaddrs=[cls.MAIL_ADMIN],
+                subject=cls.MAIL_SUBJECT_PREFIX + ' Application Error',
+                credentials=credentials,
+                secure=secure)
+            mail_handler.setLevel(logging.ERROR)
+            app.logger.addHandler(mail_handler)
 
 
 config = {
