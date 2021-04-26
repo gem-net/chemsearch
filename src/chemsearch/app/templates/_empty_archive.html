@@ -1,0 +1,12 @@
+<p class="mb-0">No molecules found in archive.</p>
+{% if current_user.is_admin or not config['USE_AUTH'] %}
+    <ul>
+        <li><strong>If you are starting from an empty archive</strong>,
+            add MOL files to your archive following the required file hierarchy.
+        </li>
+        <li><strong>If there are already MOL files in your archive</strong>,
+            a rebuild on the <a href="{{ url_for('main.admin') }}">Admin</a> page.</li>
+    </ul>
+{% else %}
+    <p class="mb-0">An admin user may need to run a rebuild.</p>
+{% endif %}
