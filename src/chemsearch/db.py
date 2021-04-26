@@ -17,7 +17,12 @@ class MolException(Exception):
 _logger = logging.getLogger(__name__)
 
 
-def load_molecules(load_rdkit_mol=True):
+LOCAL_MOLECULES = []
+MOLECULE_DICT = {}
+DUPLICATE_TRACKER = None
+
+
+def iter_molecules(load_rdkit_mol=True):
     # drive_path = os.path.join(LOCAL_DB_PATH, 'gdrive.tsv')
     # gd = pd.read_csv(drive_path, sep='\t')
     if not os.path.exists(paths.REFERENCE_PATH):
@@ -34,15 +39,33 @@ def load_molecules(load_rdkit_mol=True):
         yield LocalMolecule(rec, store_mol=load_rdkit_mol)
 
 
+# def load_initial_db_data():
+#     global LOCAL_MOLECULES, MOLECULE_DICT, DUPLICATE_TRACKER
+#     try:
+#         LOCAL_MOLECULES = list(iter_molecules(load_rdkit_mol=True))
+#     except MolFileNotFoundError as e:
+#         _logger.info(f"Aborting molecule load. {e}")
+#         LOCAL_MOLECULES = []
+#     MOLECULE_DICT = {i.inchi_key: i for i in LOCAL_MOLECULES}
+#     DUPLICATE_TRACKER = DuplicateTracker()
+
+
 def reload_molecules():
     global LOCAL_MOLECULES, MOLECULE_DICT, DUPLICATE_TRACKER
-    new_molecules = list(load_molecules(load_rdkit_mol=True))
+    try:
+        new_molecules = list(iter_molecules(load_rdkit_mol=True))
+    except MolFileNotFoundError as e:
+        _logger.info(f"Aborting molecule load. {e}")
+        new_molecules = []
     new_id_dict = {i.inchi_key: i for i in new_molecules}
     LOCAL_MOLECULES.clear()
     LOCAL_MOLECULES.extend(new_molecules)
     MOLECULE_DICT.clear()
     MOLECULE_DICT.update(new_id_dict)
-    DUPLICATE_TRACKER.update()
+    if DUPLICATE_TRACKER is None:
+        DUPLICATE_TRACKER = DuplicateTracker()
+    else:
+        DUPLICATE_TRACKER.update()
 
 
 def _load_reference_file_as_df():
@@ -154,12 +177,3 @@ class DuplicateTracker:
                 _logger.info(key_str)
         else:
             _logger.info("No duplicates found.")
-
-
-try:
-    LOCAL_MOLECULES = list(load_molecules(load_rdkit_mol=True))
-except MolFileNotFoundError as e:
-    _logger.info(f"Aborting molecule load. {e}")
-    LOCAL_MOLECULES = []
-MOLECULE_DICT = {i.inchi_key: i for i in LOCAL_MOLECULES}
-DUPLICATE_TRACKER = DuplicateTracker()

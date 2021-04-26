@@ -49,10 +49,16 @@ def create_app(config_name):
     # SET CONFIG_DEPENDENT MODULE ATTRIBUTES
     from .filters import set_filters_using_config
     set_filters_using_config(app)
-    from .users import update_members_dict_from_config
-    update_members_dict_from_config(app)
 
     link_data(app)
+
+    @app.before_first_request
+    def before_first_request():
+        from .users import update_members_dict_from_config
+        update_members_dict_from_config(app)
+        app.logger.info('Loading initial db data.')
+        from ..db import reload_molecules
+        reload_molecules()
 
     @app.before_request
     def before_request():
