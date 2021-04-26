@@ -5,14 +5,11 @@ import yaml
 
 from collections import OrderedDict
 
+from ..paths import DEMO_DIR
+
 _basedir = os.path.abspath(os.path.dirname(__file__))
 _logger = logging.getLogger(__name__)
 PACKAGE_ROOT = pathlib.Path(__file__).parent.parent.parent.parent
-
-
-def get_demo_dir_path():
-    demo_dir = str(PACKAGE_ROOT.joinpath('demo_db'))
-    return demo_dir
 
 
 def load_custom_queries():
@@ -66,7 +63,7 @@ class Config:
     if USE_AUTH:
         GROUP_KEY = os.environ.get('GROUP_KEY')
 
-    LOCAL_DB_PATH = os.environ.get('LOCAL_DB_PATH', get_demo_dir_path())
+    LOCAL_DB_PATH = os.environ.get('LOCAL_DB_PATH', str(DEMO_DIR))
     os.environ.update({'LOCAL_DB_PATH': LOCAL_DB_PATH})
     _logger.debug(f"Using {LOCAL_DB_PATH=}")
 
