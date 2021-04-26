@@ -5,6 +5,7 @@ creds.json
 local_db
 *.sqlite
 wiki
+docs
 custom_queries.yaml
 /src/chemsearch/app/static/data
 /notebooks/
