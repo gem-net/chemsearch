@@ -72,10 +72,7 @@ def create_app(config_name):
                 db.session.commit()
         latest_hash = ReferenceHash.get_latest_hash_from_db(app)
         if rebuild.CURRENT_REF_HASH != latest_hash:
-            app.logger.info("Identified updated reference hash "
-                            f"({rebuild.CURRENT_REF_HASH} > {latest_hash}). "
-                            "Reloading molecules.")
-            from ..db import reload_molecules
+            app.logger.info("Identified updated reference hash.")
             reload_molecules()
             rebuild.CURRENT_REF_HASH = latest_hash
 

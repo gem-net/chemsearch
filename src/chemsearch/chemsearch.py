@@ -36,13 +36,12 @@ app = create_app(os.getenv('FLASK_ENV') or 'default')
 
 @click.group()
 @click.option('--verbose/--quiet', default=False)
-def cli(verbose):
+@click.pass_context
+def cli(ctx, verbose):
     if verbose:
         logger.setLevel("DEBUG")
-    else:
-        handler = logger.handlers[0]
-        handler.setFormatter(logging.Formatter('%(message)s'))
-        handler.setLevel("INFO")
+    elif ctx.invoked_subcommand != 'flask':
+        logger.handlers[0].setFormatter(logging.Formatter('%(message)s'))
 
 
 # @cli.command()
@@ -53,7 +52,6 @@ def cli(verbose):
 
 def create_app_cli():
     env_name = os.environ.get('FLASK_ENV', 'production')
-    print(f'hello. env: {env_name}')
     return create_app(env_name)
 
 

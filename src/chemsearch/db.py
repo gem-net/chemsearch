@@ -28,7 +28,7 @@ def iter_molecules(load_rdkit_mol=True):
     if not os.path.exists(paths.REFERENCE_PATH):
         _logger.warning(f"Reference path not found: {paths.REFERENCE_PATH}.")
         return
-    _logger.info(f"Attempting to load molecule info from {paths.REFERENCE_PATH}.")
+    _logger.debug(f"Attempting to load molecule info from {paths.REFERENCE_PATH}.")
     try:
         df = _load_reference_file_as_df()
     except pd.errors.EmptyDataError:
@@ -52,6 +52,7 @@ def iter_molecules(load_rdkit_mol=True):
 
 def reload_molecules():
     global LOCAL_MOLECULES, MOLECULE_DICT, DUPLICATE_TRACKER
+    _logger.info('Loading molecule metadata.')
     try:
         new_molecules = list(iter_molecules(load_rdkit_mol=True))
     except MolFileNotFoundError as e:

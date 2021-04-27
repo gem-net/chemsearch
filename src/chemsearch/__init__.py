@@ -27,6 +27,9 @@ def _create_logger(log_level: Union[str, None] = None):
 
     _logger = logging.getLogger(__name__)
     _logger.addHandler(ch)
+    _logger.setLevel(log_level_int)
+
+    logging.getLogger('chemsearch.app').setLevel(log_level_int)
     return _logger
 
 
