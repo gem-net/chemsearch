@@ -23,7 +23,7 @@ dotenv.load_dotenv(ENV_PATH, verbose=False)  # Allow missing .env
 if 'FLASK_APP' not in os.environ:
     os.environ['FLASK_APP'] = 'chemsearch.chemsearch'
 
-from .app import create_app, link_data
+from .app import create_app, link_data, init_data
 
 app = create_app(os.getenv('FLASK_ENV') or 'default')
 
@@ -126,13 +126,17 @@ def configure(use_drive, use_auth):
     else:
         msg = "OK to create an .env file with these values?"
     is_happy = click.confirm(msg, default=True)
-    if is_happy:
-        backup_path = store_new_env(env_dict)
-        click.echo("Created new .env file.")
-        if backup_path:
-            click.echo(f"Previous config file saved to {backup_path}")
-    else:
+    if not is_happy:
         click.echo("Aborting .env file creation.")
+    backup_path = store_new_env(env_dict)
+    if backup_path:
+        click.echo(f"Previous config file saved to {backup_path}")
+
+    build_ok = click.confirm("Build metadata?", default=True)
+    if build_ok:
+        init_data(app)
+    else:
+        click.echo("You can extract metadata later with 'rebuild' on Admin page.")
 
 
 @setup.command()

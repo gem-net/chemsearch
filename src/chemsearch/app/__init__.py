@@ -88,6 +88,19 @@ def create_app(config_name):
     return app
 
 
+def init_data(app: Flask):
+    """Create database if necessary, build metadata if specified."""
+    with app.app_context():
+        app.logger.info("Initializing db")
+        db.create_all()
+        # Populate metadata files in archive dir
+        from . import rebuild
+        from .models import ReferenceHash
+        # Get current build hash for sake of noting potential change in log
+        rebuild.CURRENT_REF_HASH = ReferenceHash.get_latest_hash_from_db(app)
+        rebuild.run_full_scan_and_rebuild(user=None, run_async=False)
+
+
 def link_data(app):
     local_db_path = os.path.abspath(app.config['LOCAL_DB_PATH'])
     static_path = app.static_folder
