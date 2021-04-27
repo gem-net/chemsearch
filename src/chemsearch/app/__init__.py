@@ -42,22 +42,20 @@ def create_app(config_name):
     from .main import main as main_blueprint
     app.register_blueprint(main_blueprint)
 
-    from . import rebuild
-    from .models import ReferenceHash
-    rebuild.CURRENT_REF_HASH = ReferenceHash.get_latest_hash_from_db(app)
-
     # SET CONFIG_DEPENDENT MODULE ATTRIBUTES
     from .filters import set_filters_using_config
     set_filters_using_config(app)
 
-    link_data(app)
+    from . import rebuild
+    from .models import ReferenceHash
+    from ..db import reload_molecules
 
     @app.before_first_request
     def before_first_request():
         from .users import update_members_dict_from_config
         update_members_dict_from_config(app)
-        app.logger.info('Loading initial db data.')
-        from ..db import reload_molecules
+        link_data(app)
+        rebuild.CURRENT_REF_HASH = ReferenceHash.get_latest_hash_from_db(app)
         reload_molecules()
 
     @app.before_request
