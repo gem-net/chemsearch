@@ -109,6 +109,7 @@ def configure(use_drive, use_auth):
     _set_env_via_prompt('APP_TITLE', 'App Title', default='Chemsearch')
     _set_env_via_prompt('FLASK_ENV', 'Environment', default='production',
                         type=click.Choice(['development', 'production']))
+    _set_env_via_prompt('SECRET_KEY', 'Secret key (for encryption)')
     if use_drive or use_auth:
         _set_env_via_prompt('CREDENTIALS_AS_USER',
                             f'Authorized email (for {mode_str} credentials)',
