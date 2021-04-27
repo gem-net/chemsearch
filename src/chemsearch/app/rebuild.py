@@ -35,7 +35,6 @@ def run_full_scan_and_rebuild(user=None, run_async=True):
 def run_full_scan_and_rebuild_async(app, build_id: str):
     global CURRENT_REF_HASH
     from .. import logger, drive, paths, admin
-    # from ..db import reload_molecules
     with app.app_context():
         archive_dir = current_app.config['LOCAL_DB_PATH']
         log_path = os.path.join(archive_dir, f'rebuild_{build_id}.log')
@@ -63,11 +62,14 @@ def run_full_scan_and_rebuild_async(app, build_id: str):
         build.mark_complete_and_commit()
 
         new_hash = ReferenceHash.update_and_get_hash()
-        if new_hash != CURRENT_REF_HASH:
+        if CURRENT_REF_HASH is None:
+            logger.info(f"Reference file has hash {new_hash}.")
+        elif new_hash != CURRENT_REF_HASH:
             logger.info(f"Reference file changed with build {build.id}: "
                         f"{CURRENT_REF_HASH} ->  {new_hash}")
         else:
             logger.info(f"No change to reference file from build {build.id}.")
+        # Check for duplicates for logging purposes
         DuplicateTracker(iter_molecules(load_rdkit_mol=False))
         logger.removeHandler(fh)
 
