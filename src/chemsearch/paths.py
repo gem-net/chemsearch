@@ -23,10 +23,10 @@ def _build_path_sources_dict(db_dir):
 
 ROOT_DIR = pathlib.Path(__file__).parent.parent.parent
 DEMO_DIR = ROOT_DIR.joinpath('demo_db')
-ARCHIVE_DIR = os.environ.get('LOCAL_DB_PATH', str(DEMO_DIR))
 CONFIG_DIR = ROOT_DIR.joinpath('config').absolute()
 ENV_PATH = CONFIG_DIR.joinpath('.env')
 SERVICE_ACCOUNT_CREDS = CONFIG_DIR.joinpath('creds.json')
+ARCHIVE_DIR = None
 PATH_SOURCES = None
 SCAN_RESULTS_PATH = None
 REFERENCE_PATH = None
