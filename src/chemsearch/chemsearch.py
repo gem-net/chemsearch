@@ -8,7 +8,6 @@ import re
 import click
 import logging
 import shutil
-import pathlib
 from typing import Union
 
 import dotenv
@@ -28,12 +27,6 @@ from .app import create_app, link_data, init_data
 app = create_app(os.getenv('FLASK_ENV') or 'default')
 
 
-# REFERENCE
-# @click.option('-y', '--yaml', 'query_yaml', required=True,
-#               type=click.Path(exists=True),
-#               help='Path to YAML file with title and abstract fields.')
-
-
 @click.group()
 @click.option('--verbose/--quiet', default=False)
 @click.pass_context
@@ -44,12 +37,6 @@ def cli(ctx, verbose):
         logger.handlers[0].setFormatter(logging.Formatter('%(message)s'))
 
 
-# @cli.command()
-# def run(**kwargs):
-#     """Run the server."""
-#     app.run(port=os.environ.get('FLASK_RUN_PORT', 5000))
-
-
 def create_app_cli():
     env_name = os.environ.get('FLASK_ENV', 'production')
     return create_app(env_name)
@@ -58,7 +45,6 @@ def create_app_cli():
 @cli.group(cls=FlaskGroup, create_app=create_app_cli)
 def flask():
     """Run Flask server commands."""
-    # TODO: ensure config env is set up.
 
 
 @cli.group()
@@ -129,7 +115,8 @@ def configure(use_drive, use_auth):
     is_happy = click.confirm(msg, default=True)
     if not is_happy:
         click.echo("Aborting .env file creation.")
-    backup_path = store_new_env(env_dict)
+        return
+    backup_path = _store_new_env(env_dict)
     if backup_path:
         click.echo(f"Previous config file saved to {backup_path}")
 
@@ -159,7 +146,7 @@ def revert():
 def show():
     """Print configuration path and contents."""
     if ENV_PATH.exists():
-        click.echo(f"ENV PATH: {ENV_PATH}\n\nContents:")
+        click.echo(f"ENV PATH: {ENV_PATH}\nContents:")
         with open(ENV_PATH, 'r') as env:
             for line in env:
                 click.secho(line.strip(), fg='green')
@@ -191,10 +178,25 @@ def creds(path):
 @click.argument('path', type=click.Path(exists=True), required=True)
 def load(path):
     """Load variables from specified .env path."""
-    click.echo(f"{path=}")
+    shutil.copy(path, ENV_PATH)
+    click.echo(f"Copied {path} to {ENV_PATH}.")
 
 
-def store_new_env(env_dict) -> Union[None, os.PathLike]:
+@cli.command()
+def build():
+    """Run deployment tasks."""
+    link_data(app)
+    init_data(app, force_rebuild=True)
+
+
+@app.shell_context_processor
+def make_shell_context():
+    from .app import db
+    from .app.models import User, Rebuild
+    return dict(db=db, User=User, Rebuild=Rebuild)
+
+
+def _store_new_env(env_dict) -> Union[None, os.PathLike]:
     backup_path = None
     if ENV_PATH.exists():
         backup_path = _get_previous_env_path()
@@ -222,44 +224,3 @@ class EmailType(click.ParamType):
 
 
 EMAIL_TYPE = EmailType()
-
-
-@cli.command()
-def build():
-    """Run deployment tasks."""
-    from .app.rebuild import run_full_scan_and_rebuild
-    with app.app_context():
-        run_full_scan_and_rebuild(run_async=False)
-
-
-@cli.command()
-def link_data():
-    """Create data symlink in static directory."""
-    link_data(app)
-
-
-@cli.command()
-def deploy():
-    """Run deployment tasks."""
-    import shutil
-    # TODO: create symlink in static to local_db dir
-    use_env = '.env.deploy'
-    # shutil.copy(use_env, '.env')
-    print(f"Mock: Copied from {use_env} to .env")
-
-
-@cli.command()
-def develop():
-    """Set up development server."""
-    import shutil
-    # TODO: create symlink in static to local_db dir
-    use_env = '.env.dev'
-    shutil.copy(use_env, '.env')
-    print(f"Copied from {use_env} to .env")
-
-
-@app.shell_context_processor
-def make_shell_context():
-    from .app import db
-    from .app.models import User, Rebuild
-    return dict(db=db, User=User, Rebuild=Rebuild)
