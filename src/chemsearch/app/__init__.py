@@ -9,10 +9,9 @@ from flask_login import current_user, LoginManager
 from flask_migrate import Migrate
 from flask_moment import Moment
 
-# from flask_session import Session
-
 from .config import config
-from ..drive import Meta
+from .. import paths
+from ..db import reload_molecules
 
 
 bootstrap = Bootstrap()
@@ -20,9 +19,6 @@ db = SQLAlchemy(session_options={'expire_on_commit': False})
 login_manager = LoginManager()
 migrate = Migrate()
 moment = Moment()
-# login_manager.login_view = 'main.index'
-
-META = Meta()
 
 
 def create_app(config_name):
@@ -36,8 +32,7 @@ def create_app(config_name):
     migrate.init_app(app, db)
     moment.init_app(app)
 
-    from ..paths import update_paths
-    update_paths(use_drive=app.config['USE_DRIVE'])
+    paths.update_paths(use_drive=app.config['USE_DRIVE'])
 
     from .main import main as main_blueprint
     app.register_blueprint(main_blueprint)
@@ -48,7 +43,6 @@ def create_app(config_name):
 
     from . import rebuild
     from .models import ReferenceHash
-    from ..db import reload_molecules
 
     @app.before_first_request
     def before_first_request():

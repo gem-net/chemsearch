@@ -9,7 +9,7 @@ from rdkit.Chem.rdmolfiles import SDWriter
 
 from . import main
 from .forms import admin_form_from_users, EmptyForm
-from .. import db, META, filters, local
+from .. import db, filters, local
 from ..decorators import membership_required, admin_required
 from ..models import User, Rebuild
 from ..oauth import OAuthSignIn
@@ -20,6 +20,7 @@ from ... import drive
 
 
 _logger = logging.getLogger(__name__)
+DRIVE_META = drive.Meta()
 
 
 @main.route('/', methods=['GET', 'POST'])
@@ -59,7 +60,7 @@ def custom_info(inchi_key):
         abort(404, 'Molecule not found.')
     if current_app.config['USE_DRIVE']:
         df, rec, content = drive.get_file_listing_and_custom_info(
-            mol, files_resource=META.files_resource)
+            mol, files_resource=DRIVE_META.files_resource)
     else:
         df, rec, content = local.get_file_listing_and_custom_info(mol)
     custom_html = render_template('_custom.html', content=content, rec=rec)
