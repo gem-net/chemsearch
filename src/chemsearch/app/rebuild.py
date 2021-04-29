@@ -36,8 +36,7 @@ def run_full_scan_and_rebuild_async(app, build_id: str):
     global CURRENT_REF_HASH
     from .. import logger, drive, paths, admin
     with app.app_context():
-        archive_dir = current_app.config['LOCAL_DB_PATH']
-        log_path = os.path.join(archive_dir, f'rebuild_{build_id}.log')
+        log_path = os.path.join(paths.ARCHIVE_DIR, f'rebuild_{build_id}.log')
         fh = logging.FileHandler(log_path)
         fh.setLevel(logging.DEBUG)
         logger.addHandler(fh)
