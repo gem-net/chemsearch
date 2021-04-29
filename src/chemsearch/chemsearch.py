@@ -10,6 +10,10 @@ import logging
 import shutil
 from typing import Union
 
+# workaround for issue: "Starting a Matplotlib GUI outside of the main thread"
+import matplotlib
+matplotlib.use('Agg')
+
 import dotenv
 from flask.cli import FlaskGroup
 
