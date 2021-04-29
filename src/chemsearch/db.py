@@ -17,11 +17,6 @@ class MolException(Exception):
 _logger = logging.getLogger(__name__)
 
 
-LOCAL_MOLECULES = []
-MOLECULE_DICT = {}
-DUPLICATE_TRACKER = None
-
-
 def iter_molecules(load_rdkit_mol=True):
     # drive_path = os.path.join(LOCAL_DB_PATH, 'gdrive.tsv')
     # gd = pd.read_csv(drive_path, sep='\t')
@@ -63,10 +58,7 @@ def reload_molecules():
     LOCAL_MOLECULES.extend(new_molecules)
     MOLECULE_DICT.clear()
     MOLECULE_DICT.update(new_id_dict)
-    if DUPLICATE_TRACKER is None:
-        DUPLICATE_TRACKER = DuplicateTracker()
-    else:
-        DUPLICATE_TRACKER.update()
+    DUPLICATE_TRACKER.update()
 
 
 def _load_reference_file_as_df():
@@ -178,3 +170,8 @@ class DuplicateTracker:
                 _logger.info(key_str)
         else:
             _logger.info("No duplicates found.")
+
+
+LOCAL_MOLECULES = []
+MOLECULE_DICT = {}
+DUPLICATE_TRACKER = DuplicateTracker()
