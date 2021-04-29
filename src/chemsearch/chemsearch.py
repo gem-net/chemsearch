@@ -124,12 +124,7 @@ def configure(use_drive, use_auth):
     backup_path = _store_new_env(env_dict)
     if backup_path:
         click.echo(f"Previous config file saved to {backup_path}")
-
-    build_ok = click.confirm("Build metadata?", default=True)
-    if build_ok:
-        init_data(app)
-    else:
-        click.echo("You can extract metadata later with 'rebuild' on Admin page.")
+    click.secho("To build metadata, run: chemsearch build.", fg='green')
 
 
 @setup.command()
