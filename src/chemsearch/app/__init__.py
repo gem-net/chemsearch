@@ -49,7 +49,7 @@ def create_app(config_name):
         from .users import update_members_dict_from_config
         update_members_dict_from_config(app)
         link_data(app)
-        rebuild.CURRENT_REF_HASH = ReferenceHash.get_latest_hash_from_db(app)
+        init_data(app)
         reload_molecules()
 
     @app.before_request
@@ -82,17 +82,21 @@ def create_app(config_name):
     return app
 
 
-def init_data(app: Flask):
-    """Create database if necessary, build metadata if specified."""
+def init_data(app: Flask, force_rebuild=False):
+    """Create database if necessary, build metadata if required."""
     with app.app_context():
-        app.logger.info("Initializing db")
         db.create_all()
         # Populate metadata files in archive dir
         from . import rebuild
         from .models import ReferenceHash
         # Get current build hash for sake of noting potential change in log
         rebuild.CURRENT_REF_HASH = ReferenceHash.get_latest_hash_from_db(app)
-        rebuild.run_full_scan_and_rebuild(user=None, run_async=False)
+        ref_path = paths.REFERENCE_PATH
+        if force_rebuild or ref_path is None or not os.path.exists(ref_path):
+            app.logger.info("Populating metadata")
+            rebuild.run_full_scan_and_rebuild(user=None, run_async=False)
+        else:
+            app.logger.info("Metadata found.")
 
 
 def link_data(app):
