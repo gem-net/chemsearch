@@ -7,6 +7,9 @@ import logging
 import datetime
 import pathlib
 import hashlib
+import shutil
+import tarfile
+from importlib import resources
 from collections import OrderedDict
 
 import pandas as pd
@@ -18,11 +21,34 @@ from dotenv import load_dotenv, find_dotenv
 
 from .molecule import LocalMolecule
 from .plot import save_svg_if_not_present
-from . import drive
-
-from . import paths
+from . import drive, paths
 
 _logger = logging.getLogger(__name__)
+
+
+def create_support_dirs_extract_resources():
+    os.makedirs(paths.DATA_ROOT, exist_ok=True)
+    os.makedirs(paths.DEMO_DIR, exist_ok=True)
+    os.makedirs(paths.CONFIG_DIR, exist_ok=True)
+    # Extract demo_db into user_data_dir
+    with resources.path('chemsearch', 'demo_db.tar.gz') as gz_path:
+        with tarfile.open(gz_path, "r:gz") as tar:
+            _logger.info(f"Extracting demo data to {paths.DATA_ROOT}.")
+            tar.extractall(path=paths.DATA_ROOT)
+    # Extract config files
+    added_config = []
+    for config_basename in ['demo.env',
+                            'demo.custom_queries.yaml',
+                            'external_dbs.yaml']:
+        new_path = paths.CONFIG_DIR.joinpath(config_basename)
+        if not new_path.exists():
+            added_config.append(config_basename)
+            with resources.path('chemsearch.config', config_basename) as path:
+                shutil.copy(path, new_path)
+    if added_config:
+        _logger.info(f"Copied config files to {paths.CONFIG_DIR}: {added_config}.")
+    else:
+        _logger.info(f"Config files found in {paths.CONFIG_DIR}.")
 
 
 def run_full_scan_and_rebuild_from_drive_no_app():

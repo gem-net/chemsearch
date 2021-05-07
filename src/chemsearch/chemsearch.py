@@ -17,7 +17,7 @@ matplotlib.use('Agg')
 import dotenv
 from flask.cli import FlaskGroup
 
-from . import logger
+from . import logger, admin
 from .paths import ENV_PATH, CONFIG_DIR, DEMO_DIR
 
 # ENSURE DOTENV VARIABLES HAVE LOADED (for gunicorn)
@@ -185,6 +185,7 @@ def load(path):
 @cli.command()
 def build():
     """Run deployment tasks."""
+    admin.create_support_dirs_extract_resources()
     link_data(app)
     init_data(app, force_rebuild=True)
 
