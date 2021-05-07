@@ -5,15 +5,13 @@ import yaml
 
 from collections import OrderedDict
 
-from ..paths import DEMO_DIR
+from .. import paths
 
-_basedir = os.path.abspath(os.path.dirname(__file__))
 _logger = logging.getLogger(__name__)
-PACKAGE_ROOT = pathlib.Path(__file__).parent.parent.parent.parent
 
 
 def load_custom_queries():
-    default_path = PACKAGE_ROOT.joinpath('config', 'custom_queries.yaml')
+    default_path = paths.CONFIG_DIR.joinpath('custom_queries.yaml')
     yaml_path = os.environ.get('CUSTOM_QUERIES_YAML', default_path)
     if yaml_path.exists():
         with open(yaml_path, 'r') as infile:
@@ -38,7 +36,7 @@ class Config:
     MOLECULES_PER_PAGE = os.environ.get('MOLECULES_PER_PAGE', 15)
 
     SQLALCHEMY_DATABASE_URI = \
-        'sqlite:///' + os.path.join(_basedir, 'db.sqlite')
+        'sqlite:///' + os.path.join(paths.DATA_ROOT, 'db.sqlite')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     # SESSION_TYPE = 'filesystem'
     # SESSION_FILE_DIR = os.environ.get('SESSION_FILE_DIR', os.getcwd())
@@ -63,7 +61,7 @@ class Config:
     if USE_AUTH:
         GROUP_KEY = os.environ.get('GROUP_KEY')
 
-    LOCAL_DB_PATH = os.environ.get('LOCAL_DB_PATH', str(DEMO_DIR))
+    LOCAL_DB_PATH = os.environ.get('LOCAL_DB_PATH', str(paths.DEMO_DIR))
     os.environ.update({'LOCAL_DB_PATH': LOCAL_DB_PATH})
     _logger.debug(f"Using {LOCAL_DB_PATH=}")
 

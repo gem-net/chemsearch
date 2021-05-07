@@ -18,7 +18,7 @@ import dotenv
 from flask.cli import FlaskGroup
 
 from . import logger
-from .paths import ENV_PATH, CONFIG_DIR
+from .paths import ENV_PATH, CONFIG_DIR, DEMO_DIR
 
 # ENSURE DOTENV VARIABLES HAVE LOADED (for gunicorn)
 DOTENV_VALS = dotenv.dotenv_values(ENV_PATH)
@@ -210,7 +210,7 @@ def _store_new_env(env_dict) -> Union[None, os.PathLike]:
 
 def _get_previous_env_path():
     backup_name = ENV_PATH.name + '.prev'
-    return ENV_PATH.parent.joinpath(backup_name)
+    return CONFIG_DIR.joinpath(backup_name)
 
 
 class EmailType(click.ParamType):

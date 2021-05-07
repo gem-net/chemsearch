@@ -2,6 +2,8 @@ import os
 import pathlib
 from collections import defaultdict
 
+from appdirs import AppDirs
+
 
 def update_paths(use_drive=False):
     global ARCHIVE_DIR, PATH_SOURCES, SCAN_RESULTS_PATH, REFERENCE_PATH
@@ -21,11 +23,13 @@ def _build_path_sources_dict(db_dir):
     return sources
 
 
-ROOT_DIR = pathlib.Path(__file__).parent.parent.parent
-DEMO_DIR = ROOT_DIR.joinpath('demo_db')
-CONFIG_DIR = ROOT_DIR.joinpath('config').absolute()
+_app_dirs = AppDirs('chemsearch')
+DATA_ROOT = _app_dirs.user_data_dir
+DEMO_DIR = pathlib.Path(_app_dirs.user_data_dir).joinpath('demo_db')
+CONFIG_DIR = pathlib.Path(_app_dirs.user_config_dir).joinpath('config')
 ENV_PATH = CONFIG_DIR.joinpath('.env')
 SERVICE_ACCOUNT_CREDS = CONFIG_DIR.joinpath('creds.json')
+# DYNAMIC PATHS (set via update_paths)
 ARCHIVE_DIR = None
 PATH_SOURCES = None
 SCAN_RESULTS_PATH = None
