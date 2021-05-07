@@ -73,7 +73,8 @@ def scan_local_archive():
             moldir_path = categ_path.joinpath(test_mol_name)
             # Valid if moldir has MOL file
             _, _, files = next(os.walk(moldir_path))
-            mol_files = [i for i in files if i.endswith('.mol')]
+            mol_files = [i for i in files if i.endswith('.mol')
+                         and not i.startswith('._')]
             if len(mol_files) != 1:
                 _logger.warning(f"Skipping {test_categ} {test_mol_name}: {len(mol_files)} mol files found.")
                 continue
