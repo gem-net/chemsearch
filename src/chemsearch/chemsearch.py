@@ -72,11 +72,15 @@ def configure(use_drive, use_auth):
         env_dict[var_name] = click.prompt(prompt_str, default=default, **prompt_kw)
 
     if use_drive is None:
+        default = prev_vals.get('USE_DRIVE', False)
         use_drive = click.confirm(
-            "Use DRIVE mode (with Shared Drive storage)?", default=False)
+            "Use DRIVE mode (with Shared Drive storage)?", default=default)
+    env_dict['USE_DRIVE'] = use_drive
     if use_auth is None:
+        default = prev_vals.get('USE_DRIVE', False)
         use_auth = click.confirm(
-            "Use AUTH mode (with Google Group authentication)?", default=False)
+            "Use AUTH mode (with Google Group authentication)?", default=default)
+    env_dict['USE_AUTH'] = use_auth
 
     bold_style = dict(bold=True, fg='red')
     for test, mode_str, mode_desc in [
@@ -87,7 +91,8 @@ def configure(use_drive, use_auth):
         if test:
             click.secho(f"Building configuration for {mode_desc}.", **bold_style)
             break
-    use_demo = click.confirm("Use demo data?", default=False)
+    use_demo = False if use_drive else click.confirm("Use demo data?",
+                                                     default=False)
     if not use_demo:
         _set_env_via_prompt('LOCAL_DB_PATH', 'Local archive folder',
                             default=os.getcwd(),
