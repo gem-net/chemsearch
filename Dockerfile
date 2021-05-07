@@ -12,13 +12,11 @@ RUN conda env create -n chemsearch -f /tmp/environment.yaml \
 ENV PATH=/opt/conda/envs/chemsearch/bin:$PATH
 
 WORKDIR /app
-COPY src ./src
-COPY ./demo_db ./demo_db
-COPY /config/demo.app_only.env ./config/.env
-COPY ./config/external_dbs.yaml ./config/external_dbs.yaml
+COPY setup.py setup.cfg pyproject.toml ./
+COPY src src/
 
-RUN ["python", "-m", "src.chemsearch.prelaunch"]
+RUN ["python", "setup.py", "develop"]
+RUN ["chemsearch", "build"]
 
-ENTRYPOINT ["gunicorn", "--worker-tmp-dir", "/dev/shm", "--log-file=-", \
-            "src.chemsearch.chemsearch:app"]
-CMD ["--bind=0.0.0.0:5000", "-w 1", "-k gevent"]
+CMD ["gunicorn", "--worker-tmp-dir", "/dev/shm", "--log-file=-", \
+     "chemsearch.chemsearch:app", "--bind=0.0.0.0:5000", "-w 1", "-k gevent"]
