@@ -87,12 +87,15 @@ def configure(use_drive, use_auth):
         if test:
             click.secho(f"Building configuration for {mode_desc}.", **bold_style)
             break
-
-    _set_env_via_prompt('LOCAL_DB_PATH', 'Local archive folder',
-                        default=os.getcwd(),
-                        type=click.Path(exists=True, file_okay=False,
-                                        dir_okay=True, writable=True,
-                                        resolve_path=True))
+    use_demo = click.confirm("Use demo data?", default=False)
+    if not use_demo:
+        _set_env_via_prompt('LOCAL_DB_PATH', 'Local archive folder',
+                            default=os.getcwd(),
+                            type=click.Path(exists=True, file_okay=False,
+                                            dir_okay=True, writable=True,
+                                            resolve_path=True))
+    else:
+        env_dict['LOCAL_DB_PATH'] = str(DEMO_DIR)
 
     # FLASK_RUN_PORT not used unless flask run from .env directory
     # _set_env_via_prompt('FLASK_RUN_PORT', 'Port', default=5000)
