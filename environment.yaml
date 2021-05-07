@@ -17,18 +17,19 @@ dependencies:
   - google-auth
   - google-auth-httplib2
   - gunicorn
-  - flask-bootstrap
   - matplotlib
   - Flask-Login
   - Flask-SQLAlchemy
-  - rauth
-  - Flask-Moment
   - beautifulsoup4
   - markdown
   - bleach
   - pyyaml
   - gevent
   - more-itertools
+  - appdirs
   - pip:
+    - rauth
+    - Flask-Moment
+    - Flask-Bootstrap
     - flask-shell-ipython
     - flask-migrate
