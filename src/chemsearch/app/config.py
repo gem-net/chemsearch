@@ -33,6 +33,10 @@ class Config:
             }
         }
 
+    SIM_FINGERPRINT = os.environ.get('SIM_FINGERPRINT', 'Morgan')
+    SIM_COEFFICIENT = os.environ.get('SIM_COEFFICIENT', 'Tanimoto')
+    _logger.debug(f"Will use {SIM_FINGERPRINT} fingerprint with {SIM_COEFFICIENT} index.")
+
     MOLECULES_PER_PAGE = os.environ.get('MOLECULES_PER_PAGE', 15)
 
     SQLALCHEMY_DATABASE_URI = \
@@ -63,7 +67,7 @@ class Config:
 
     LOCAL_DB_PATH = os.environ.get('LOCAL_DB_PATH', str(paths.DEMO_DIR))
     os.environ.update({'LOCAL_DB_PATH': LOCAL_DB_PATH})
-    _logger.debug(f"Using {LOCAL_DB_PATH=}")
+    _logger.debug(f"Using LOCAL_DB_PATH={LOCAL_DB_PATH}")
 
     CUSTOM_QUERIES = load_custom_queries()
 

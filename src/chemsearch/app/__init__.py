@@ -10,7 +10,7 @@ from flask_migrate import Migrate
 from flask_moment import Moment
 
 from .config import config
-from .. import paths
+from .. import paths, similarity
 from ..db import reload_molecules
 
 
@@ -33,6 +33,9 @@ def create_app(config_name):
     moment.init_app(app)
 
     paths.update_paths(use_drive=app.config['USE_DRIVE'])
+    similarity.set_fingerprint_fn(app.config['SIM_FINGERPRINT'])
+    similarity.set_coefficient_fn(app.config['SIM_COEFFICIENT'])
+
 
     from .main import main as main_blueprint
     app.register_blueprint(main_blueprint)
