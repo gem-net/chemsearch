@@ -1,15 +1,13 @@
 """Classes for molecules (user input version and local extended info)."""
 import os
-# import base64
 import logging
 from urllib.parse import urljoin
 
 from flask import url_for
 import pandas as pd
 from rdkit import Chem
-from rdkit.Chem import AllChem
 
-from . import paths
+from . import paths, similarity
 
 
 _logger = logging.getLogger(__name__)
@@ -36,10 +34,7 @@ class Molecule:
             # self.smarts = Chem.MolToSmarts(mol)
             # self.inchi = Chem.MolToInchi(mol)
             self.inchi_key = Chem.MolToInchiKey(mol)  # google-able. "Phenethylcyclohexane"
-            # self.fingerprint_substructure = Chem.RDKFingerprint(mol).ToBase64()
-            self.fingerprint_similarity_raw = Molecule.get_morgan_fingerprint(mol)
-            # morgan_base64 = base64.b64encode(morgan_fingerprint.ToBinary()).decode('utf8')
-            # self.fingerprint_similarity = morgan_base64
+            self.fingerprint_similarity_raw = Molecule.get_fingerprint(mol)
         else:
             self.is_valid = False
             self.smiles = None
@@ -47,8 +42,8 @@ class Molecule:
             self.fingerprint_similarity_raw = None
 
     @classmethod
-    def get_morgan_fingerprint(cls, mol):
-        return Chem.AllChem.GetMorganFingerprint(mol, 2)
+    def get_fingerprint(cls, mol):
+        return similarity.calculate_fingerprint(mol)
 
 
 class LocalMolecule(Molecule):
@@ -76,7 +71,7 @@ class LocalMolecule(Molecule):
             if store_mol:
                 self.mol = LocalMolecule._load_structure_from_mol(self.mol_path)
                 if self.mol is not None:
-                    self.fingerprint_similarity_raw = Molecule.get_morgan_fingerprint(self.mol)
+                    self.fingerprint_similarity_raw = Molecule.get_fingerprint(self.mol)
                     self.mol.SetProp("_Name", self.mol_name)
                 else:
                     self.fingerprint_similarity_raw = None

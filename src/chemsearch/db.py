@@ -4,9 +4,8 @@ from collections import Counter, defaultdict, namedtuple
 
 import pandas as pd
 from rdkit.Chem import MolFromSmiles, MolFromSmarts
-from rdkit.DataStructs import TanimotoSimilarity
 
-from . import paths
+from . import paths, similarity
 from .molecule import LocalMolecule, Molecule, MolFileNotFoundError
 
 
@@ -82,12 +81,12 @@ def get_sim_matches(smiles, mols=None):
     query = MolFromSmiles(smiles)
     if query is None:
         raise MolException("Error building molecule from input.")
-    fp_q = Molecule.get_morgan_fingerprint(query)
+    fp_q = Molecule.get_fingerprint(query)
     results = []
     mols = LOCAL_MOLECULES if mols is None else mols
     for m in mols:
         fp = m.fingerprint_similarity_raw
-        sim = TanimotoSimilarity(fp_q, fp)
+        sim = similarity.calculate_similarity(fp_q, fp)
         results.append((sim, m))
     results.sort(key=lambda t: t[0], reverse=True)
     sims, molecules = zip(*results) if results else ([], [])
