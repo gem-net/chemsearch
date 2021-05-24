@@ -17,8 +17,6 @@ _logger = logging.getLogger(__name__)
 
 
 def iter_molecules(load_rdkit_mol=True):
-    # drive_path = os.path.join(LOCAL_DB_PATH, 'gdrive.tsv')
-    # gd = pd.read_csv(drive_path, sep='\t')
     if not os.path.exists(paths.REFERENCE_PATH):
         _logger.warning(f"Reference path not found: {paths.REFERENCE_PATH}.")
         return
@@ -27,8 +25,6 @@ def iter_molecules(load_rdkit_mol=True):
         df = _load_reference_file_as_df()
     except pd.errors.EmptyDataError:
         return
-    # categories = sorted(list(df.category.unique()))
-    # category_counts = df.category.value_counts().to_dict()
     for ind, rec in df.iterrows():
         yield LocalMolecule(rec, store_mol=load_rdkit_mol)
 
@@ -171,6 +167,6 @@ class DuplicateTracker:
             _logger.info("No duplicates found.")
 
 
-LOCAL_MOLECULES = []
-MOLECULE_DICT = {}
+LOCAL_MOLECULES = []  # type: [LocalMolecule]
+MOLECULE_DICT = {}  # type: dict[str, LocalMolecule] # keys are inchi_key
 DUPLICATE_TRACKER = DuplicateTracker()
