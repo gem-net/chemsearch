@@ -72,15 +72,15 @@ def configure(use_drive, use_auth):
         env_dict[var_name] = click.prompt(prompt_str, default=default, **prompt_kw)
 
     if use_drive is None:
-        default = prev_vals.get('USE_DRIVE', False)
+        mode_default = prev_vals.get('USE_DRIVE', 'False').lower() not in {'off', 'false', '0'}
         use_drive = click.confirm(
-            "Use DRIVE mode (with Shared Drive storage)?", default=default)
-    env_dict['USE_DRIVE'] = use_drive
+            "Use DRIVE mode (with Shared Drive storage)?", default=mode_default)
+    env_dict['USE_DRIVE'] = str(use_drive)
     if use_auth is None:
-        default = prev_vals.get('USE_DRIVE', False)
+        mode_default = prev_vals.get('USE_DRIVE', False).lower() not in {'off', 'false', '0'}
         use_auth = click.confirm(
-            "Use AUTH mode (with Google Group authentication)?", default=default)
-    env_dict['USE_AUTH'] = use_auth
+            "Use AUTH mode (with Google Group authentication)?", default=mode_default)
+    env_dict['USE_AUTH'] = str(use_auth)
 
     bold_style = dict(bold=True, fg='red')
     for test, mode_str, mode_desc in [
