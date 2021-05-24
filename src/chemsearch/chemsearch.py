@@ -109,6 +109,20 @@ def configure(use_drive, use_auth):
                         type=click.Choice(['development', 'production']))
     _set_env_via_prompt('SECRET_KEY', 'Secret key (for encryption)',
                         default=os.urandom(16).hex())
+
+    # SIMILARITY FINGERPRINT AND COEFFICIENT
+    from .similarity import fp_fn_dict, coeff_fn_dict
+    fp_options = list(fp_fn_dict)
+    _set_env_via_prompt('SIM_FINGERPRINT', 'Fingerprint type',
+                        type=click.Choice(fp_options), default='Morgan')
+    chosen_fp = env_dict['SIM_FINGERPRINT']
+    if chosen_fp not in {'Morgan', 'AtomPairs', 'TopologicalTorsions'}:
+        coeff_options, suggested = list(coeff_fn_dict), 'Tanimoto'
+    else:
+        coeff_options, suggested = ['Dice', 'Tanimoto'], 'Dice'
+    _set_env_via_prompt('SIM_COEFFICIENT', 'Fingerprint type',
+                        type=click.Choice(coeff_options), default=suggested)
+
     if use_drive or use_auth:
         _set_env_via_prompt('CREDENTIALS_AS_USER',
                             f'Authorized email (for {mode_str} credentials)',
