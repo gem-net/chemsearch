@@ -215,8 +215,12 @@ def build():
 @app.shell_context_processor
 def make_shell_context():
     from .app import db
-    from .app.models import User, Rebuild
-    return dict(db=db, User=User, Rebuild=Rebuild)
+    from .app.models import User, Rebuild, CustomSpec, CustomMatch
+    from .db import LOCAL_MOLECULES, reload_molecules
+    reload_molecules()
+    return dict(db=db, User=User, Rebuild=Rebuild,
+                LOCAL_MOLECULES=LOCAL_MOLECULES,
+                CustomSpec=CustomSpec, CustomMatch=CustomMatch)
 
 
 def _store_new_env(env_dict) -> Union[None, os.PathLike]:
