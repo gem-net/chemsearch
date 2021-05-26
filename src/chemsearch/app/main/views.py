@@ -148,6 +148,7 @@ def results():
                            search_type=search_type, n_pages=n_pages,
                            filters=filter_dict, filterable=filterable,
                            sort_by=sort_by, query_type=query_type,
+                           custom_category=custom_category,
                            )
 
 

@@ -13,6 +13,9 @@
 </div>
 
 <div id="search-terms">
+    {% if custom_category %}
+    <h4><span class="text-muted">Shortcut group:</span> {{ custom_category }}</h4>
+    {% endif %}
     <h4><span class="text-muted">{{ query_type | upper }}:</span> {{ query }}</h4>
 </div>
 
