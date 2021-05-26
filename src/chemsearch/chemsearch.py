@@ -61,7 +61,7 @@ def setup():
               show_default=True, help="Use DRIVE mode, linking Shared Drive.")
 @click.option('-a/-n', '--use-auth/--no-auth', default=None, show_default=True,
               help="Use AUTH mode, with Google authentication.")
-def configure(use_drive, use_auth):
+def config_prompt(use_drive, use_auth):
     """Create configuration .env file via command prompt."""
     env_dict = dict()
     prev_vals = DOTENV_VALS.copy()
@@ -149,8 +149,8 @@ def configure(use_drive, use_auth):
     click.secho("To build metadata, run: chemsearch build.", fg='green')
 
 
-@setup.command()
-def revert():
+@setup.command('revert')
+def config_revert():
     """Revert to previous .env file."""
     prev_path = _get_previous_env_path()
     if prev_path.exists():
@@ -164,8 +164,8 @@ def revert():
         click.echo("No previous configuration file found.")
 
 
-@setup.command()
-def show():
+@setup.command('show')
+def config_show():
     """Print configuration path and contents."""
     if ENV_PATH.exists():
         click.echo(f"ENV PATH: {ENV_PATH}\nContents:")
@@ -176,8 +176,8 @@ def show():
         click.echo("No configuration file found.")
 
 
-@setup.command()
-def edit():
+@setup.command('edit')
+def config_edit():
     """Open configuration .env file in an editor."""
     if not ENV_PATH.exists():
         ENV_PATH.touch()
@@ -185,9 +185,9 @@ def edit():
     click.launch(str(ENV_PATH))
 
 
-@setup.command()
+@setup.command('creds')
 @click.argument('path', type=click.Path(exists=True), required=True)
-def creds(path):
+def config_creds(path):
     """Copy Google JSON credentials to config folder."""
     if not path.lower().endswith('.json'):
         click.echo("Please provide a path that ends with '.json'.")
@@ -198,7 +198,7 @@ def creds(path):
 
 @setup.command('import')
 @click.argument('path', type=click.Path(exists=True), required=True)
-def load(path):
+def config_import(path):
     """Load variables from specified .env path."""
     shutil.copy(path, ENV_PATH)
     click.echo(f"Copied {path} to {ENV_PATH}.")
