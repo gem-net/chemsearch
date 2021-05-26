@@ -280,7 +280,9 @@ def shortcuts_prompt():
     if is_changed:
         # back up previous file
         backup_path = _get_previous_yaml_path()
-        SHORTCUTS_YAML.rename(backup_path)
+        if SHORTCUTS_YAML.exists():
+            SHORTCUTS_YAML.rename(backup_path)
+            click.echo(f"Backed up previous shortcuts yaml to {backup_path}.")
         with open(SHORTCUTS_YAML, 'w') as out:
             yaml.dump(dict(items), out, sort_keys=False)
         click.echo("Updated shortcuts file.")

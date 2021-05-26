@@ -1,6 +1,5 @@
 import os
 import logging
-import pathlib
 import yaml
 
 from collections import OrderedDict
@@ -15,7 +14,8 @@ def load_custom_queries() -> dict:
     yaml_path = paths.SHORTCUTS_YAML
     if yaml_path.exists():
         with open(yaml_path, 'r') as infile:
-            query_dict = OrderedDict(yaml.load(infile, Loader=yaml.SafeLoader))
+            query_dict = yaml.load(infile, Loader=yaml.SafeLoader)
+            query_dict = OrderedDict(query_dict) if query_dict is not None else {}
     else:
         query_dict = {}
     return query_dict
