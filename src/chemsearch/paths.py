@@ -29,6 +29,7 @@ DEMO_DIR = pathlib.Path(_app_dirs.user_data_dir).joinpath('demo_db')
 CONFIG_DIR = pathlib.Path(_app_dirs.user_config_dir).joinpath('config')
 ENV_PATH = CONFIG_DIR.joinpath('.env')
 SERVICE_ACCOUNT_CREDS = CONFIG_DIR.joinpath('creds.json')
+SHORTCUTS_YAML = CONFIG_DIR.joinpath('custom_queries.yaml')
 # DYNAMIC PATHS (set via update_paths)
 ARCHIVE_DIR = None
 PATH_SOURCES = None

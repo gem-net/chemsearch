@@ -10,14 +10,14 @@ from .. import paths
 _logger = logging.getLogger(__name__)
 
 
-def load_custom_queries():
-    default_path = paths.CONFIG_DIR.joinpath('custom_queries.yaml')
-    yaml_path = os.environ.get('CUSTOM_QUERIES_YAML', default_path)
+def load_custom_queries() -> dict:
+    """Load dictionary of substructure shortcuts, {name: smarts_str}."""
+    yaml_path = paths.SHORTCUTS_YAML
     if yaml_path.exists():
         with open(yaml_path, 'r') as infile:
             query_dict = OrderedDict(yaml.load(infile, Loader=yaml.SafeLoader))
     else:
-        query_dict = None
+        query_dict = {}
     return query_dict
 
 
