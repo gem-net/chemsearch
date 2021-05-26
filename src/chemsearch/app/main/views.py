@@ -9,7 +9,7 @@ from rdkit.Chem.rdmolfiles import SDWriter
 
 from . import main
 from .forms import admin_form_from_users, EmptyForm
-from .. import db, filters, local
+from .. import db, filters, local, custom_smarts
 from ..decorators import membership_required, admin_required
 from ..models import User, Rebuild
 from ..oauth import OAuthSignIn
@@ -100,19 +100,31 @@ def results():
     query = request.args.get('query')
     query_type = request.args.get('query_type', 'smiles')
     is_smiles = query_type in ('smiles', '')
+    is_smarts = ~is_smiles
     search_type = request.args.get('search_type')
     if query in (None, '') or search_type in (None, ''):
         flash("Bad inputs", "error")
         return redirect(url_for('.search'))
     page_no = request.args.get('page', 1, type=int)
     molecules, molecules_all, sims, n_pages = None, None, None, None
+    custom_category = None
     if search_type == 'substructure':
-        try:
-            molecules_all = get_substructure_matches(query, mols=pass_mols,
-                                                     is_smarts=~is_smiles)
-        except MolException as e:
-            flash(str(e), "error")
-            return redirect(url_for('.search'))
+        # Use custom query results if applicable
+        is_custom_query = False
+        if is_smarts:
+            for spec in custom_smarts.SPEC_LIST:
+                if query == spec.smarts_str:
+                    is_custom_query = True
+                    custom_category = spec.query_name
+                    molecules_all = custom_smarts.lookup_custom_matches(current_app, spec)
+                    break
+        if not is_custom_query:
+            try:
+                molecules_all = get_substructure_matches(query, mols=pass_mols,
+                                                         is_smarts=~is_smiles)
+            except MolException as e:
+                flash(str(e), "error")
+                return redirect(url_for('.search'))
         n_pages = get_page_count(len(molecules_all))
         molecules = get_page_items_or_404(molecules_all, page_no) \
             if molecules_all else []
