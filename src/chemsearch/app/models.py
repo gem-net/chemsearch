@@ -122,3 +122,32 @@ class ReferenceHash(db.Model):
     def __repr__(self):
         version = 'gdrive' if self.is_gdrive else 'local'
         return f'<ReferenceHash {version}>'
+
+
+class CustomSpec(db.Model):
+    __tablename__ = 'smarts'
+    smarts_hash = db.Column(db.String(32), primary_key=True)
+    query_name = db.Column(db.Text, nullable=False, unique=True)
+    smarts_str = db.Column(db.Text, nullable=False)
+
+    matches = db.relationship('CustomMatch', cascade='all, delete-orphan',
+                              backref='spec')
+
+    def __repr__(self):
+        return '<CustomSpec {}>'.format(self.query_name)
+
+
+class CustomMatch(db.Model):
+    __tablename__ = 'matches'
+    smarts_hash = db.Column(db.String(32), db.ForeignKey('smarts.smarts_hash'),
+                            primary_key=True)
+    inchi_key = db.Column(db.String(27), primary_key=True)
+    sub_match = db.Column(db.Boolean, default=False)
+
+    # spec = db.relationship("CustomSpec", back_populates="matches")
+
+    # __table_args__ = (ForeignKeyConstraint(('smarts_hash',),
+    #                                        ('smarts.smarts_hash',)),)
+
+    def __repr__(self):
+        return '<CustomMatch>'

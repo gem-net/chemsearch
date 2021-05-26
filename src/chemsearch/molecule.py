@@ -41,8 +41,16 @@ class Molecule:
             self.inchi_key = None
             self.fingerprint_similarity_raw = None
 
+    def has_substructure(self, smarts_str: str):
+        query_mol = Chem.MolFromSmarts(smarts_str)
+        if query_mol is None:
+            _logger.info(f"Failed to build Mol from SMARTS: {smarts_str}")
+            return False
+        return self.mol.HasSubstructMatch(query_mol)
+
     @classmethod
     def get_fingerprint(cls, mol):
+        """Calculate fingerprint using method specified in app configuration."""
         return similarity.calculate_fingerprint(mol)
 
 
