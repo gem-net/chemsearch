@@ -5,10 +5,12 @@ or
 """
 import os
 import re
+import yaml
 import click
 import logging
 import shutil
 from typing import Union
+from collections import namedtuple
 
 # workaround for issue: "Starting a Matplotlib GUI outside of the main thread"
 import matplotlib
@@ -18,7 +20,7 @@ import dotenv
 from flask.cli import FlaskGroup
 
 from . import logger, admin
-from .paths import ENV_PATH, CONFIG_DIR, DEMO_DIR
+from .paths import ENV_PATH, CONFIG_DIR, DEMO_DIR, SHORTCUTS_YAML
 
 # ENSURE DOTENV VARIABLES HAVE LOADED (for gunicorn)
 DOTENV_VALS = dotenv.dotenv_values(ENV_PATH)
@@ -56,7 +58,7 @@ def setup():
     """Set up chemsearch, configuring ENV variables."""
 
 
-@setup.command('config')
+@setup.command('prompt')
 @click.option('-d/-l', '--use-drive/--local-only', default=None,
               show_default=True, help="Use DRIVE mode, linking Shared Drive.")
 @click.option('-a/-n', '--use-auth/--no-auth', default=None, show_default=True,
@@ -204,6 +206,109 @@ def config_import(path):
     click.echo(f"Copied {path} to {ENV_PATH}.")
 
 
+
+@cli.group()
+def shortcuts():
+    """View and modify custom SMARTS queries, AKA shortcuts."""
+
+
+@shortcuts.command('show')
+def shortcuts_show():
+    """Print configuration path and contents."""
+    if app.config['CUSTOM_QUERIES']:
+        for name, smarts_str in app.config['CUSTOM_QUERIES'].items():
+            click.secho(f"{name}: {smarts_str}", fg='green')
+    elif not SHORTCUTS_YAML.exists():
+        click.echo("No shortcuts file found. Create one with command:")
+        click.secho("chemsearch shortcuts prompt", fg='green')
+    else:
+        click.echo("Shortcuts file is empty. Modify with command:")
+        click.secho("chemsearch shortcuts prompt", fg='green')
+
+
+@shortcuts.command('edit')
+def shortcuts_edit():
+    """Open configuration .env file in an editor."""
+    if not SHORTCUTS_YAML.exists():
+        SHORTCUTS_YAML.touch()
+    click.echo(f"Opening {SHORTCUTS_YAML}. Edit, then save when you're done.")
+    click.launch(str(SHORTCUTS_YAML))
+
+
+@shortcuts.command('prompt')
+def shortcuts_prompt():
+    """Create shortcuts yaml file via command prompt."""
+
+    is_changed = False
+    if not app.config['CUSTOM_QUERIES']:
+        click.secho("Starting with empty shortcuts file...")
+        items = []
+    # if exists, first allow modification of entries
+    else:
+        items = list(app.config['CUSTOM_QUERIES'].items())
+    new_items = []
+    discard_inds = []
+    NewSpec = namedtuple('NewSpec', ['ind', 'name', 'smarts_str'])
+    for ind, (name, smarts_str) in enumerate(items):
+        # show name: val. prompt keep / modify / delete
+        click.secho(f"\nName: {name}\nSMARTS: {smarts_str}", fg='green')
+        options = click.Choice(['k', 'm', 'd'], case_sensitive=False)
+        action = click.prompt("[k]eep, [m]odify, [d]elete", type=options,
+                              default='k')
+        if action == 'd':
+            is_changed = True
+            discard_inds.append(ind)
+        elif action == 'm':
+            is_changed = True
+            new_name, new_smarts = _prompt_shortcut(default_name=name,
+                                                    default_smarts=smarts_str)
+            spec = NewSpec(ind=ind, name=new_name, smarts_str=new_smarts)
+            new_items.append(spec)
+    # modify then delete, for consistency of indices
+    for spec in new_items:
+        items[spec.ind] = (spec.name, spec.smarts_str)
+    if discard_inds:
+        items = [j for i, j in enumerate(items) if i not in discard_inds]
+
+    # Add new shortcuts if requested
+    while True:
+        if not click.confirm("Add another shortcut?", default=False):
+            break
+        items.append(_prompt_shortcut())
+        is_changed = True
+
+    if is_changed:
+        # back up previous file
+        backup_path = _get_previous_yaml_path()
+        SHORTCUTS_YAML.rename(backup_path)
+        with open(SHORTCUTS_YAML, 'w') as out:
+            yaml.dump(dict(items), out, sort_keys=False)
+        click.echo("Updated shortcuts file.")
+    else:
+        click.echo("No changes to shortcuts.")
+
+
+@shortcuts.command('revert')
+def shortcuts_revert():
+    """Revert to previous yaml file."""
+    prev_path = _get_previous_yaml_path()
+    if prev_path.exists():
+        overwrite = click.confirm("Are you sure you want to restore previous shortcuts file?")
+        if overwrite:
+            prev_path.rename(SHORTCUTS_YAML)
+            click.echo("Shortcuts reset to previous values.")
+        else:
+            click.echo("Aborted.")
+    else:
+        click.echo("No previous shortcuts file found.")
+
+
+def _prompt_shortcut(default_name=None, default_smarts=None):
+    new_name = click.prompt('New name', default=default_name)
+    new_smarts = click.prompt('SMARTS', default=default_smarts)
+    return new_name, new_smarts
+
+
 @cli.command()
 def build():
     """Run deployment tasks."""
@@ -237,6 +342,11 @@ def _store_new_env(env_dict) -> Union[None, os.PathLike]:
 
 def _get_previous_env_path():
     backup_name = ENV_PATH.name + '.prev'
+    return CONFIG_DIR.joinpath(backup_name)
+
+
+def _get_previous_yaml_path():
+    backup_name = SHORTCUTS_YAML.name + '.prev'
     return CONFIG_DIR.joinpath(backup_name)
 
 
