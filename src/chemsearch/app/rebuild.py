@@ -4,10 +4,10 @@ from threading import Thread
 
 from flask import current_app
 
-from . import db
+from . import db, custom_smarts
 from .models import Rebuild, ReferenceHash
 
-from ..db import iter_molecules, DuplicateTracker
+from ..db import reload_molecules
 
 
 CURRENT_REF_HASH = None
@@ -61,15 +61,21 @@ def run_full_scan_and_rebuild_async(app, build_id: str):
         build.mark_complete_and_commit()
 
         new_hash = ReferenceHash.update_and_get_hash()
+        data_changed = False
         if CURRENT_REF_HASH is None:
             logger.info(f"Reference file has hash {new_hash}.")
+            data_changed = True
         elif new_hash != CURRENT_REF_HASH:
             logger.info(f"Reference file changed with build {build.id}: "
                         f"{CURRENT_REF_HASH} ->  {new_hash}")
+            data_changed = True
         else:
             logger.info(f"No change to reference file from build {build.id}.")
         # Check for duplicates for logging purposes
-        DuplicateTracker(iter_molecules(load_rdkit_mol=False))
+        if data_changed:
+            reload_molecules()
+            # DuplicateTracker(iter_molecules(load_rdkit_mol=False))
+            custom_smarts.update_custom_spec_db(app)
         logger.removeHandler(fh)
 
 

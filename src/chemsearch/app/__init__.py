@@ -36,13 +36,13 @@ def create_app(config_name):
     similarity.set_fingerprint_fn(app.config['SIM_FINGERPRINT'])
     similarity.set_coefficient_fn(app.config['SIM_COEFFICIENT'])
 
+    # SET CONFIG_DEPENDENT MODULE ATTRIBUTES
+    from . import filters, custom_smarts
+    filters.set_filters_using_config(app)
+    custom_smarts.init_app(app)
 
     from .main import main as main_blueprint
     app.register_blueprint(main_blueprint)
-
-    # SET CONFIG_DEPENDENT MODULE ATTRIBUTES
-    from .filters import set_filters_using_config
-    set_filters_using_config(app)
 
     from . import rebuild
     from .models import ReferenceHash
@@ -52,7 +52,7 @@ def create_app(config_name):
         from .users import update_members_dict_from_config
         update_members_dict_from_config(app)
         link_data(app)
-        init_data(app)
+        init_data(app)  # includes custom substructure update
         reload_molecules()
 
     @app.before_request
