@@ -209,12 +209,12 @@ def config_import(path):
 
 @cli.group()
 def shortcuts():
-    """View and modify custom SMARTS queries, AKA shortcuts."""
+    """View and modify custom SMARTS substructure queries, AKA shortcuts."""
 
 
 @shortcuts.command('show')
 def shortcuts_show():
-    """Print configuration path and contents."""
+    """Print shortcuts."""
     if app.config['CUSTOM_QUERIES']:
         for name, smarts_str in app.config['CUSTOM_QUERIES'].items():
             click.secho(f"{name}: {smarts_str}", fg='green')
@@ -228,7 +228,7 @@ def shortcuts_show():
 
 @shortcuts.command('edit')
 def shortcuts_edit():
-    """Open configuration .env file in an editor."""
+    """Open shortcuts yaml file in an editor."""
     if not SHORTCUTS_YAML.exists():
         SHORTCUTS_YAML.touch()
     click.echo(f"Opening {SHORTCUTS_YAML}. Edit, then save when you're done.")
@@ -272,7 +272,7 @@ def shortcuts_prompt():
 
     # Add new shortcuts if requested
     while True:
-        if not click.confirm("Add another shortcut?", default=False):
+        if not click.confirm("Add a shortcut?", default=False):
             break
         items.append(_prompt_shortcut())
         is_changed = True
@@ -303,6 +303,15 @@ def shortcuts_revert():
             click.echo("Aborted.")
     else:
         click.echo("No previous shortcuts file found.")
+
+
+@shortcuts.command('refresh')
+def shortcuts_refresh():
+    """Update shortcuts substructure matching tables."""
+    from .app.custom_smarts import update_custom_spec_db
+    from .db import reload_molecules
+    reload_molecules()
+    update_custom_spec_db(app)
 
 
 def _prompt_shortcut(default_name=None, default_smarts=None):
