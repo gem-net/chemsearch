@@ -344,6 +344,7 @@ def _store_new_env(env_dict) -> Union[None, os.PathLike]:
     if ENV_PATH.exists():
         backup_path = _get_previous_env_path()
         ENV_PATH.rename(backup_path)
+    ENV_PATH.parent.mkdir(exist_ok=True)
     ENV_PATH.touch()
     for key in env_dict:
         dotenv.set_key(ENV_PATH, key, env_dict[key])
