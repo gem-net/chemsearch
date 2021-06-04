@@ -26,7 +26,7 @@ to members of a specified Google Group.
 - [Getting started](#getting-started)
   - [Quick start, using Docker image](#quick-start-using-docker-image)
   - [Manual installation](#manual-installation)
-    - [Installing Python dependences](#installing-python-dependences)
+    - [Installing the dependencies and `chemsearch` executable](#installing-the-dependencies-and-chemsearch-executable)
     - [Starting the server](#starting-the-server)
 - [Customization](#customization)
   - [The env file](#the-env-file)
@@ -67,72 +67,88 @@ docker run -p 5000:5000 --rm \
 
 ### Manual installation
 
-#### Installing Python dependences
+#### Installing the dependencies and `chemsearch` executable
 
-After you clone or [download](https://github.com/gem-net/chemsearch/archive/master.zip) 
-and unzip the repository, you must install the dependencies. The easiest way to 
-install the required Python 3 environment and all dependencies is via Conda.
+Chemsearch requires Python 3.6 and above, plus a number of third-party Python packages, 
+and rdkit. The easiest way to install everything is with Conda. Conda can set up a
+suitable Python virtual environment for use with Chemsearch and install rdkit, all
+with a single command. 
 1. If you don't have `conda` on your system, install [Miniconda](https://docs.conda.io/en/latest/miniconda.html).  
-2. In the terminal, navigate to the cloned/downloaded folder.
-3. Create a conda virtual environment with all dependencies:
+2. Clone or [download](https://github.com/gem-net/chemsearch/archive/master.zip) 
+  the Chemsearch repository, and unzip it somewhere convenient for long-term storage
+  —your Python environment will store a link to the folder as part of installation.
+3. In your terminal, navigate to the folder and run the following to create a 
+  conda virtual environment with all dependencies:
    ```bash
    conda env create -n chemsearch -f environment.yaml
    ```
     - or to create an environment precisely mimicking a tested version, specify 
     `environment.lock.yaml` instead of `environment.yaml` above. 
-4. Activate the new environment with `conda activate chemsearch`.
-5. [Optional] Install the chemsearch package by running `python setup.py develop` 
-  (to install in development mode, allowing code modifications without 
-   re-installation.)
+4. Activate the new environment with `conda activate chemsearch`. (This environment
+  will need to be activated each time you want to run Chemsearch.)
+5. Install the chemsearch package by running `python setup.py develop`. This 
+    will add a `chemsearch` CLI executable to your PATH that you can use to 
+    configure and run your Chemsearch server.
+6. (Optional) To bypass app configuration and import a demo library for use with the app, run 
+  `chemsearch build`. This demo library will be available for browsing when you 
+  start the server.
 
 
-#### Starting the server
+### Starting the server
 
-The WSGI server executables `flask` and `gunicorn` are available after installing 
-the dependencies as above, and either can be used to serve the application. 
-`flask` is a 'development' server, best suited to testing code changes, while    
-`gunicorn` is more production-ready.
+The WSGI server executables `gunicorn` and `flask` are available after installing 
+the package and dependencies as above and activating the chemsearch virtual environment. 
+Either executable can be used to serve the application. `gunicorn` is the recommended, 
+more production-ready option, while `flask` is a 'development' server, best suited 
+to testing code changes.
+
+ **GUNICORN**:
+To serve using `gunicorn`, run the following :
+```shell script
+gunicorn -w 1 -k gevent chemsearch.chemsearch:app
+```
+- Note that you can add [command arguments](https://docs.gunicorn.org/en/stable/run.html#commonly-used-arguments) 
+to further customize the application server, to modify e.g. listening port and 
+number of worker processes. The command above uses a single 'gevent' worker.
  
 **FLASK**:
-To serve using `flask`, run the following from the top directory of the repository:
+
+To serve using `flask`, run the following:
 ```shell script
-FLASK_APP=src/chemsearch/chemsearch.py flask run
+chemsearch flask run
 ```
 - This can be simplified to `flask run` if you set `FLASK_APP` in the configuration 
 file `config/.env`.
 
-**GUNICORN**:
-To serve using `gunicorn`, run the following from the top directory of the repository:
-```shell script
-gunicorn -w 1 -k gevent src.chemsearch.chemsearch:app
-```
-- Note that you can add command arguments to further customize the application 
-server, to modify e.g. listening port and number of worker processes. The command
-above uses a single 'gevent' worker.
-
 
 ## Customization
 
-With default settings, Chemsearch will serve a demo library, but the app can be 
-customized by modifying configuration files in the `config` subdirectory. 
+Chemsearch has a command-line interface (CLI) that will help you configure the 
+app. Get started by running `chemsearch setup prompt` in your terminal. This will 
+walk you through the creation of the 'env' file that stores the configuration settings. 
+
+Run `chemsearch setup` to see a complete list of setup subcommands, including: 
+```
+  creds   Copy Google JSON credentials to config folder.
+  edit    Open configuration .env file in an editor.
+  import  Load variables from specified .env path.
+  prompt  Create configuration .env file via command prompt.
+  revert  Revert to previous .env file.
+  show    Print configuration path and contents.
+```
 
 ### The env file
-
-An 'env' file provides the primary configuration detail. Demo env files, 
-`demo.app_only.env` (minimal settings) and `demo.env`, have been provided. Use the 
-`demo.env` file to create your own configuration file, which must have the 
-filename `.env` and be placed in the `config` folder.
 
 The env file is used to specify non-default options via environment variables:
 - root directory for local compounds library (LOCAL_DB_PATH)
 - app title, for banner (APP_TITLE, default 'Chemsearch')
 - DRIVE mode status, for use with Google Shared Drive (USE_DRIVE, default 'off')
 - AUTH mode status (on/off), for authentication with Google OAuth (USE_AUTH, default 'off')
-- Flask settings, if serving using `flask` application server: 
-  development vs production mode (FLASK_ENV, default 'production'); 
-  port (FLASK_RUN_PORT, default 5000); 
-  and WSGI script path (FLASK_APP).
-
+- Flask environment mode (development vs production), if serving using 
+  `flask` application server (FLASK_ENV, default 'production').
+- Fingerprint for similarity matching (SIM_FINGERPRINT, default 'Morgan').
+- Coefficient for similarity matching (SIM_COEFFICIENT, default 'Dice').
+  
 To use Shared Drive and/or Authentication modes, you will need to [set up a 
 Google Workspace](#google-workspace-setup) and provide some additional env 
 variables. In the Google-specific variable list below, a tick below means the 
@@ -163,9 +179,13 @@ Notes
 
 The search page can be customized with shortcut buttons that run a specific
 substructure search. These buttons are created automatically (at app launch time) 
-when a `custom_queries.yaml` file is added to the `config` folder. A demo file
-(`config/demo.custom_queries.yaml`) is provided which shows the required format:
+when a `custom_queries.yaml` file is added to the `config` folder. The `chemsearch` 
+CLI can walk you through the creation of this file with the command:
+```shell script
+chemsearch shortcuts prompt
+```
 
+An example specification:
 ```yaml
 # FORMAT EACH SHORTCUT AS <Name for button>: '<SMARTS STRING>'
 Aliphatic amines: '[$([NH2][CX4]),$([NH]([CX4])[CX4]),$([NX3]([CX4])([CX4])[CX4])]'
