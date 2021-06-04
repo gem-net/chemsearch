@@ -1,7 +1,10 @@
 """
-Run app with `flask run`
-or
-`gunicorn -b 0.0.0.0:5005 -w 2 --threads=4 --worker-class=gthread src.chemsearch.chemsearch:app`
+After package has been installed with `python setup.py develop`, to start server:
+With gunicorn:
+    gunicorn -b 0.0.0.0:5005 -w 1 -k gthread chemsearch.chemsearch:app
+    gunicorn -b 0.0.0.0:5005 -w 1 -k gevent chemsearch.chemsearch:app
+With flask (not recommended):
+    FLASK_APP=chemsearch.chemsearch flask run
 """
 import os
 import re
