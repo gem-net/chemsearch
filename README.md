@@ -27,7 +27,7 @@ to members of a specified Google Group.
   - [Quick start, using Docker image](#quick-start-using-docker-image)
   - [Manual installation](#manual-installation)
     - [Installing the dependencies and `chemsearch` executable](#installing-the-dependencies-and-chemsearch-executable)
-    - [Starting the server](#starting-the-server)
+  - [Starting the server](#starting-the-server)
 - [Customization](#customization)
   - [The env file](#the-env-file)
   - [Custom queries: substructure search shortcuts](#custom-queries-substructure-search-shortcuts)
