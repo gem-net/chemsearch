@@ -74,12 +74,12 @@ def config_prompt(use_drive, use_auth):
         env_dict[var_name] = click.prompt(prompt_str, default=default, **prompt_kw)
 
     if use_drive is None:
-        mode_default = prev_vals.get('USE_DRIVE', 'False').lower() not in {'off', 'false', '0'}
+        mode_default = _coerce_to_bool(prev_vals.get('USE_DRIVE'), default=False)
         use_drive = click.confirm(
             "Use DRIVE mode (with Shared Drive storage)?", default=mode_default)
     env_dict['USE_DRIVE'] = str(use_drive)
     if use_auth is None:
-        mode_default = prev_vals.get('USE_DRIVE', False).lower() not in {'off', 'false', '0'}
+        mode_default = _coerce_to_bool(prev_vals.get('USE_AUTH'), default=False)
         use_auth = click.confirm(
             "Use AUTH mode (with Google Group authentication)?", default=mode_default)
     env_dict['USE_AUTH'] = str(use_auth)
@@ -359,6 +359,15 @@ def _get_previous_env_path():
 def _get_previous_yaml_path():
     backup_name = SHORTCUTS_YAML.name + '.prev'
     return CONFIG_DIR.joinpath(backup_name)
+
+
+def _coerce_to_bool(val, default=None):
+    """Coerce str and bool versions of USE_DRIVE and USE_AUTH to bool."""
+    if val is None:
+        val = default
+    if type(val) is bool:
+        return val
+    return val.lower() not in {'off', 'false', '0'}
 
 
 class EmailType(click.ParamType):
