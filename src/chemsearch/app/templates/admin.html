@@ -24,7 +24,7 @@
 
     <button id='reload-button' class="btn btn-default btn-lg
         {{ 'disabled' if in_progress_builds else '' }}">
-        <span class="glyphicon glyphicon-refresh"></span> Rebuild DB
+        <span class="glyphicon glyphicon-refresh"></span> Rescan Library
     </button>
 
     <form id='clear-div' action="{{ url_for('main.clear_rebuilds') }}" method="post"
