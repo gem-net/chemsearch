@@ -9,6 +9,7 @@ def update_paths(use_drive=False):
     global ARCHIVE_DIR, PATH_SOURCES, SCAN_RESULTS_PATH, REFERENCE_PATH
     _version = 'gdrive' if use_drive else 'local'
     ARCHIVE_DIR = os.environ.get('LOCAL_DB_PATH')
+    os.makedirs(ARCHIVE_DIR, exist_ok=True)
     PATH_SOURCES = _build_path_sources_dict(ARCHIVE_DIR)
     SCAN_RESULTS_PATH = PATH_SOURCES[_version]['scan']
     REFERENCE_PATH = PATH_SOURCES[_version]['master']
