@@ -25,7 +25,7 @@ class OAuthSignIn(object):
 
     def get_callback_url(self):
         callback_url = url_for('main.oauth_callback', provider=self.provider_name,
-                               _external=True)
+                               _external=True, _scheme='https')
         if 'X-Forwarded-Server' in request.headers:
             server_local = request.headers['Host']
             server_public = request.headers['X-Forwarded-Host']
