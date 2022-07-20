@@ -117,7 +117,7 @@ def get_mol_files(folders, files_resource=None):
         folders (pd.DataFrame): output from get_mol_folders.
         files_resource: files API resource.
     """
-    mols_full = run_query("mimeType = 'chemical/x-mdl-molfile'  and trashed = false",
+    mols_full = run_query("mimeType contains 'molfile' and trashed = false",
                           files_resource=files_resource)  # type: pd.DataFrame
     if mols_full is None:
         return pd.DataFrame(
