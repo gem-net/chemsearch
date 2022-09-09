@@ -1,9 +1,10 @@
+import os
 import logging
 from datetime import datetime
 from io import StringIO, BytesIO
 
 from flask import render_template, flash, redirect, url_for, request, g, \
-    current_app, abort, send_file
+    current_app, abort, send_file, send_from_directory
 from flask_login import login_user, logout_user, current_user
 from rdkit.Chem.rdmolfiles import SDWriter
 
@@ -16,7 +17,7 @@ from ..oauth import OAuthSignIn
 from ..paging import get_page_items_or_404, get_page_count
 from ...db import get_substructure_matches, get_sim_matches, MolException, \
     LOCAL_MOLECULES, MOLECULE_DICT, DUPLICATE_TRACKER, valid_mols_present
-from ... import drive
+from ... import drive, paths
 
 
 _logger = logging.getLogger(__name__)
@@ -198,6 +199,20 @@ def sdf():
     tmp_bytes.seek(0)
     return send_file(tmp_bytes, mimetype=mimetype, as_attachment=True,
                      attachment_filename=filename, cache_timeout=-1)
+
+
+@main.route('/lastlog')
+@admin_required
+def download_latest_log():
+    build = Rebuild.get_most_recent_complete_rebuild()
+    log_filename = f'rebuild_{build.id}.log'
+    return send_from_directory(paths.ARCHIVE_DIR, log_filename, as_attachment=True)
+
+
+@main.route('/lastscan')
+@admin_required
+def download_latest_scan():
+    return send_file(paths.SCAN_RESULTS_PATH, as_attachment=True)
 
 
 @main.route('/clear-rebuilds', methods=['POST'])
