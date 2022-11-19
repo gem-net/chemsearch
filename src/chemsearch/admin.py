@@ -34,7 +34,26 @@ def create_support_dirs_extract_resources():
     with resources.path('chemsearch', 'demo_db.tar.gz') as gz_path:
         with tarfile.open(gz_path, "r:gz") as tar:
             _logger.info(f"Extracting demo data to {paths.DATA_ROOT}.")
-            tar.extractall(path=paths.DATA_ROOT)
+            def is_within_directory(directory, target):
+                
+                abs_directory = os.path.abspath(directory)
+                abs_target = os.path.abspath(target)
+            
+                prefix = os.path.commonprefix([abs_directory, abs_target])
+                
+                return prefix == abs_directory
+            
+            def safe_extract(tar, path=".", members=None, *, numeric_owner=False):
+            
+                for member in tar.getmembers():
+                    member_path = os.path.join(path, member.name)
+                    if not is_within_directory(path, member_path):
+                        raise Exception("Attempted Path Traversal in Tar File")
+            
+                tar.extractall(path, members, numeric_owner=numeric_owner) 
+                
+            
+            safe_extract(tar, path=paths.DATA_ROOT)
     # Extract config files
     added_config = []
     for config_basename in ['demo.env',
